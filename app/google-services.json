@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "12281617434",
+    "firebase_url": "https://cashearingapp.firebaseio.com",
+    "project_id": "cashearingapp",
+    "storage_bucket": "cashearingapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12281617434:android:36403564208e2944",
+        "android_client_info": {
+          "package_name": "com.example.user.cashearingapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "12281617434-lfseiocg9f2ej6s8ccevne2p39tlirme.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.user.cashearingapp",
+            "certificate_hash": "8bdefa4a0fede6e0b5bedda822fa55cd9af796f5"
+          }
+        },
+        {
+          "client_id": "12281617434-sphrpg9fokgnj09k0corqtp5sp15ngva.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFwpAgOjep-eYAJYTkEb6QZZV1olrq_Zk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "12281617434-sphrpg9fokgnj09k0corqtp5sp15ngva.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
