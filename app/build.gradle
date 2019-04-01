@@ -24,9 +24,12 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:design:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
     implementation 'com.google.firebase:firebase-ads:11.8.0'
     implementation 'com.google.firebase:firebase-auth:11.8.0'
     implementation 'com.google.firebase:firebase-database:11.8.0'
+    implementation 'com.google.firebase:firebase-messaging:11.8.0'
+    implementation 'com.google.firebase:firebase-storage:11.8.0'
     testImplementation 'junit:junit:4.12'
 
     implementation 'com.hbb20:ccp:2.2.2'

@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.user.cashearingapp.AccountSetUpActivity;
 import com.example.user.cashearingapp.MainActivity;
 import com.example.user.cashearingapp.R;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,7 +47,6 @@ public class PhoneAuthConfirmActivity extends AppCompatActivity {
 
         String phoneNumber = getIntent().getStringExtra("phoneNumber");
 
-        Toast.makeText(this, phoneNumber, Toast.LENGTH_SHORT).show();
 
         sentVarificationCode(phoneNumber);
 
@@ -93,7 +93,7 @@ public class PhoneAuthConfirmActivity extends AppCompatActivity {
 
                         if (task.isSuccessful()){
 
-                          Intent intent = new Intent(PhoneAuthConfirmActivity.this, MainActivity.class);
+                          Intent intent = new Intent(PhoneAuthConfirmActivity.this, AccountSetUpActivity.class);
                           intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                           startActivity(intent);
                           progressDialog.dismiss();

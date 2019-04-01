@@ -6,10 +6,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -22,6 +26,10 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -30,37 +38,49 @@ import com.google.firebase.database.ValueEventListener;
 
 public class TaskActivity extends AppCompatActivity implements View.OnClickListener,RewardedVideoAdListener {
 
-    TextView timeTV;
+    TextView timeTV2;
     Button startBtn;
- /*   CountDownTimer countDownTimer;
-    long timeLeft = 10000;
-    boolean timeRunning;
-    String timeText;*/
-
-    TextView task1,task2,task3,task4,task5,task6,task7,task8,task9,task10;
+    TextView task1,task2,task3,task4,task5,task6,task7,task8,task9,task10,task11,task12;
     TextView finalTask;
     TextView counterId, mainBalanceId;
-    int count = 1;
+    int count = 0;
+    int myCount = 0;
     int mainBalance = 0;
+
+    int clickPoint = 0;
+    int clickCount = 0;
+    int warningCount = 0;
+    int warningScore = 0;
+
     private InterstitialAd mInterstitialAd;
+
     SharedPreferences myScore;
+    SharedPreferences myScore2;
+    SharedPreferences myScore3;
+
     private ProgressBar progressBar;
-    private int progress;
     ProgressDialog dialog;
 
     CountDownTimer countDownTimer;
     long timeLeft = 10000;
     boolean timeRunning;
     String timeText;
+
+    CountDownTimer countDownTimer2;
+    long timeLeft2 = 59000;
+    boolean timeRunning2;
+    String timeText2;
+
+
     Button rawaerdVideo;
-
-
     FirebaseDatabase database;
     DatabaseReference myRef;
+
+    FirebaseAuth auth;
+    FirebaseUser user;
+    String uID;
     BalanceSetUp balanceSetUp;
     ClickBalanceControl clickBalanceControl;
-
-
     private RewardedVideoAd mRewardedVideoAd;
 
 
@@ -71,25 +91,20 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_task);
 
 
-
-
-        timeTV = findViewById(R.id.timeTvId);
+        timeTV2 = findViewById(R.id.timeTvId);
         startBtn = findViewById(R.id.startButtonId);
+
+        timeTV2.setVisibility(View.GONE);
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("Balance");
+
+
+        auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
+        uID = user.getUid();
         balanceSetUp= new BalanceSetUp();
         clickBalanceControl=new ClickBalanceControl();
-
-       /* startBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                starStop();
-
-            }
-        });
-        updateTimer();
-        */
 
 
         MobileAds.initialize(this,
@@ -102,20 +117,18 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
         mRewardedVideoAd.setRewardedVideoAdListener(this);
         loadRewardedVideoAd();
-        rawaerdVideo = findViewById(R.id.rewerdVideoButton_id);
-
-        rawaerdVideo.setEnabled(false);
 
         initialized();
 
 
-        myRef.child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 if (dataSnapshot.exists()){
 
+                    progressBar.setVisibility(View.GONE);
                     String value = dataSnapshot.getValue(String.class);
                     balanceSetUp.setBalance(Integer.parseInt(value));
                     mainBalanceId.setText("MainBalance: "+balanceSetUp.getBalance());
@@ -134,21 +147,22 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        myRef.child("LoveBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(uID).child("LoveBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
                 // whenever data at this location is updated.
                 if (dataSnapshot.exists()){
 
+                    progressBar.setVisibility(View.GONE);
                     String value = dataSnapshot.getValue(String.class);
                     clickBalanceControl.setBalance(Integer.parseInt(value));
                     counterId.setText("Show: "+clickBalanceControl.getBalance());
 
-                  /*  myScore = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+                    myScore = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = myScore.edit();
                     editor.putInt("score", clickBalanceControl.getBalance());
-                    editor.commit();*/
+                    editor.commit();
 
                 }else {
                     Toast.makeText(TaskActivity.this, "Data Empty..", Toast.LENGTH_SHORT).show();
@@ -163,15 +177,28 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
+        myScore = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+        myCount = myScore.getInt("score",0);
 
 
+        myScore2 = this.getSharedPreferences("MyScore", Context.MODE_PRIVATE);
+        clickCount = myScore2.getInt("clickPoint",0);
+
+
+        myScore3 = this.getSharedPreferences("YourWarningScore", Context.MODE_PRIVATE);
+        warningCount = myScore3.getInt("warningScore",0);
+
+        completeTask();
 
 
 
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
-                // Code to be executed when an ad finishes loading.
+
+               if (mInterstitialAd.isLoaded()){
+                   Toast.makeText(TaskActivity.this, "Ad is loaded...", Toast.LENGTH_SHORT).show();
+               }
 
             }
 
@@ -187,7 +214,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onAdLeftApplication() {
-                // Code to be executed when the user has left the app.
+
+
+                warningMethod();
+
             }
 
             @Override
@@ -196,17 +226,8 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
                 // Code to be executed when when the interstitial ad is closed.
                 mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-                if (clickBalanceControl.getBalance() >=10){
+                if (clickCount==3){
 
-
-                   /* count-=10;
-                    myScore = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor =  myScore.edit();
-                    editor.putInt("score",count);
-                    editor.commit();*/
-
-
-                    //counterId.setText(""+count);
                     Intent intent = new Intent(TaskActivity.this,Click_Activity.class);
                     intent.putExtra("click","love");
                     startActivity(intent);
@@ -214,37 +235,81 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
 
                 }else {
+                    if (myCount >=12){
+
+                        clickPoint++;
+                        myScore2 = getSharedPreferences("MyScore", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = myScore2.edit();
+                        editor.putInt("clickPoint",clickPoint);
+                        editor.commit();
+                        myRef.child(uID).child("LoveBalance").removeValue();
+                        starStop2();
 
 
+                    }else {
 
-                    mainBalance = mainBalance+5;
+                        mainBalance = mainBalance+1;
 
-                    balanceSetUp.AddBalance(mainBalance);
-                    String updateBalance = String.valueOf(balanceSetUp.getBalance());
-                    myRef.child("MainBalance").setValue(updateBalance);
+                        balanceSetUp.AddBalance(mainBalance);
+                        String updateBalance = String.valueOf(balanceSetUp.getBalance());
+                        myRef.child(uID).child("MainBalance").setValue(updateBalance);
 
-                    count++;
-                    clickBalanceControl.AddBalance(count);
-                    String showBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child("LoveBalance").setValue(showBalance);
+                        count++;
+                        clickBalanceControl.AddBalance(count);
+                        String showBalance = String.valueOf(clickBalanceControl.getBalance());
+                        myRef.child(uID).child("LoveBalance").setValue(showBalance);
 
-                    progressBar.setVisibility(View.GONE);
-                    startStop();
+                        progressBar.setVisibility(View.GONE);
+                        startStop();
 
+
+                    }
 
                 }
+
+
             }
         });
 
+
+
+    }
+
+    private void warningMethod() {
+        if (warningCount>=3){
+
+            mainBalance = mainBalance-10;
+            balanceSetUp.Withdraw(mainBalance);
+            String updateBalance = String.valueOf(balanceSetUp.getBalance());
+            myRef.child(uID).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+
+                        Toast.makeText(TaskActivity.this, "10 point is Minus...!\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
+                    }else {
+
+
+                    }
+                }
+            });
+
+        }else {
+
+            warningToast();
+            warningScore++;
+            myScore3 = getSharedPreferences("YourWarningScore", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = myScore3.edit();
+            editor.putInt("warningScore",warningScore);
+            editor.commit();
+
+        }
 
     }
 
     @Override
     public void onBackPressed() {
-
-        startActivity(new Intent(TaskActivity.this,MainActivity.class));
-        finish();
-
+        super.onBackPressed();
     }
 
     private void initialized(){
@@ -259,12 +324,15 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         task8 = findViewById(R.id.task8);
         task9 = findViewById(R.id.task9);
         task10 = findViewById(R.id.task10);
+        task11 = findViewById(R.id.task11);
+        task12 = findViewById(R.id.task12);
         finalTask = findViewById(R.id.finalTask);
+
         counterId = findViewById(R.id.counterId);
         mainBalanceId = findViewById(R.id.mainBalance_id);
         progressBar = findViewById(R.id.progressBarId);
 
-        progressBar.setVisibility(View.GONE);
+        progressBar.setVisibility(View.VISIBLE);
 
         task1.setOnClickListener(this);
         task2.setOnClickListener(this);
@@ -276,29 +344,31 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         task8.setOnClickListener(this);
         task9.setOnClickListener(this);
         task10.setOnClickListener(this);
+        task11.setOnClickListener(this);
+        task12.setOnClickListener(this);
         finalTask.setOnClickListener(this);
         counterId.setOnClickListener(this);
 
-       /* myScore = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
-        count = myScore.getInt("score", 1);
-
-*/
+   }
 
 
+    private void completeTask(){
 
-        if (clickBalanceControl.getBalance() >= 2) {
+
+
+        if (myCount == 1) {
             task1.setBackgroundResource(R.drawable.full_love);
 
         }
 
-        if (clickBalanceControl.getBalance() >= 3) {
+        if (myCount == 2) {
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
 
         }
 
 
-        if (clickBalanceControl.getBalance() >= 4) {
+        if (myCount == 3) {
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
             task3.setBackgroundResource(R.drawable.full_love);
@@ -306,7 +376,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        if (clickBalanceControl.getBalance() >= 5) {
+        if (myCount == 4) {
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
             task3.setBackgroundResource(R.drawable.full_love);
@@ -315,7 +385,8 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        if (clickBalanceControl.getBalance() >= 6) {
+        if (myCount == 5) {
+
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
             task3.setBackgroundResource(R.drawable.full_love);
@@ -325,7 +396,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        if (clickBalanceControl.getBalance() >= 7) {
+        if (myCount == 6) {
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
             task3.setBackgroundResource(R.drawable.full_love);
@@ -335,7 +406,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        if (clickBalanceControl.getBalance() >= 8) {
+        if (myCount == 7) {
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
             task3.setBackgroundResource(R.drawable.full_love);
@@ -346,7 +417,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        if (clickBalanceControl.getBalance() >= 9) {
+        if (myCount == 8) {
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
             task3.setBackgroundResource(R.drawable.full_love);
@@ -359,7 +430,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        if (clickBalanceControl.getBalance() >= 10) {
+        if (myCount == 9) {
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
             task3.setBackgroundResource(R.drawable.full_love);
@@ -372,7 +443,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }
 
 
-        if (clickBalanceControl.getBalance() >= 11) {
+        if (myCount == 10) {
 
             task1.setBackgroundResource(R.drawable.full_love);
             task2.setBackgroundResource(R.drawable.full_love);
@@ -385,7 +456,38 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             task9.setBackgroundResource(R.drawable.full_love);
             task10.setBackgroundResource(R.drawable.full_love);
 
+        } if (myCount == 11) {
+
+            task1.setBackgroundResource(R.drawable.full_love);
+            task2.setBackgroundResource(R.drawable.full_love);
+            task3.setBackgroundResource(R.drawable.full_love);
+            task4.setBackgroundResource(R.drawable.full_love);
+            task5.setBackgroundResource(R.drawable.full_love);
+            task6.setBackgroundResource(R.drawable.full_love);
+            task7.setBackgroundResource(R.drawable.full_love);
+            task8.setBackgroundResource(R.drawable.full_love);
+            task9.setBackgroundResource(R.drawable.full_love);
+            task10.setBackgroundResource(R.drawable.full_love);
+            task11.setBackgroundResource(R.drawable.full_love);
+
+        } if (myCount == 12) {
+
+            task1.setBackgroundResource(R.drawable.full_love);
+            task2.setBackgroundResource(R.drawable.full_love);
+            task3.setBackgroundResource(R.drawable.full_love);
+            task4.setBackgroundResource(R.drawable.full_love);
+            task5.setBackgroundResource(R.drawable.full_love);
+            task6.setBackgroundResource(R.drawable.full_love);
+            task7.setBackgroundResource(R.drawable.full_love);
+            task8.setBackgroundResource(R.drawable.full_love);
+            task9.setBackgroundResource(R.drawable.full_love);
+            task10.setBackgroundResource(R.drawable.full_love);
+            task11.setBackgroundResource(R.drawable.full_love);
+            task12.setBackgroundResource(R.drawable.full_love);
+
         }
+
+
 
     }
 
@@ -396,11 +498,11 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         if (v.getId() == R.id.task1)
         {
 
-            if (clickBalanceControl.getBalance() == 1){
+            if (myCount == 0){
                 if (mInterstitialAd.isLoaded()) {
                     if (timeLeft > 9999) {
                         mInterstitialAd.show();
-                        task1.setBackgroundResource(R.drawable.full_love);
+                         task1.setBackgroundResource(R.drawable.full_love);
                     }
 
                 } else {
@@ -411,20 +513,15 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(this, "Please try again ", Toast.LENGTH_SHORT).show();
             }
 
-            //progressBar.setVisibility(View.VISIBLE);
-           /* loadTask();
-          firstTask();*/
 
         }
         if (v.getId() == R.id.task2){
-            if (clickBalanceControl.getBalance() == 2){
+            if (myCount == 1){
 
                 if (mInterstitialAd.isLoaded()) {
                     if (timeLeft >9999) {
                         mInterstitialAd.show();
                         task2.setBackgroundResource(R.drawable.full_love);
-                    }else {
-                        Toast.makeText(this, "Not Work", Toast.LENGTH_SHORT).show();
                     }
 
                 } else {
@@ -437,10 +534,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
 
         } if (v.getId() == R.id.task3){
-            if (clickBalanceControl.getBalance() ==3){
-                if (mInterstitialAd.isLoaded()) {
+            if (myCount ==2){
+                if (mRewardedVideoAd.isLoaded()) {
                     if (timeLeft >9999 ) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
                         task3.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -453,7 +550,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
 
         }if (v.getId() == R.id.task4){
-            if (clickBalanceControl.getBalance() ==4){
+            if (myCount ==3){
                 if (mInterstitialAd.isLoaded()) {
                     if (timeLeft >9999) {
                         mInterstitialAd.show();
@@ -470,10 +567,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
 
         }if (v.getId() == R.id.task5){
-            if (clickBalanceControl.getBalance() == 5) {
-                if (mInterstitialAd.isLoaded()) {
+            if (myCount == 4) {
+                if (mRewardedVideoAd.isLoaded()) {
                     if (timeLeft >9999) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
                         task5.setBackgroundResource(R.drawable.full_love);
                     }
                 } else {
@@ -485,7 +582,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         }if (v.getId() == R.id.task6){
 
-            if (clickBalanceControl.getBalance() == 6) {
+            if (myCount == 5) {
                 if (mInterstitialAd.isLoaded()) {
                     if (timeLeft >9999) {
                         mInterstitialAd.show();
@@ -501,10 +598,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         }if (v.getId() == R.id.task7){
 
-            if (clickBalanceControl.getBalance() == 7) {
-                if (mInterstitialAd.isLoaded()) {
+            if (myCount == 6) {
+                if (mRewardedVideoAd.isLoaded()) {
                     if (timeLeft >9999) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
                         task7.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -516,7 +613,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             }
         }if (v.getId() == R.id.task8){
 
-            if (clickBalanceControl.getBalance() == 8) {
+            if (myCount == 7) {
                 if (mInterstitialAd.isLoaded()) {
                     if (timeLeft >9999) {
                         mInterstitialAd.show();
@@ -531,11 +628,11 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         }if (v.getId() == R.id.task9){
-            if (clickBalanceControl.getBalance() == 9) {
-                if (mInterstitialAd.isLoaded()) {
+            if (myCount == 8) {
+                if (mRewardedVideoAd.isLoaded()) {
 
                     if (timeLeft >9999) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
                         task9.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -547,7 +644,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         }if (v.getId() == R.id.task10){
-            if (clickBalanceControl.getBalance() == 10) {
+            if (myCount == 9) {
                 if (mInterstitialAd.isLoaded()) {
 
                     if (timeLeft >9999) {
@@ -562,9 +659,41 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             }else {
                 Toast.makeText(this, "Please Complete previous Task ", Toast.LENGTH_SHORT).show();
             }
+        }if (v.getId() == R.id.task11){
+
+            if (myCount == 10){
+                if (mRewardedVideoAd.isLoaded()) {
+                    if (timeLeft >9999) {
+                        mRewardedVideoAd.show();
+
+                    }
+
+                } else {
+                    Toast.makeText(this, "Please try again", Toast.LENGTH_SHORT).show();
+                }
+            }else {
+                Toast.makeText(this, "Please Complete previous Task ", Toast.LENGTH_SHORT).show();
+            }
+
+        }if (v.getId() == R.id.task12){
+
+            if (myCount == 11){
+                if (mInterstitialAd.isLoaded()) {
+                    if (timeLeft >9999) {
+                        mInterstitialAd.show();
+
+                    }
+
+                } else {
+                    Toast.makeText(this, "Please try again", Toast.LENGTH_SHORT).show();
+                }
+            }else {
+                Toast.makeText(this, "Please Complete previous Task ", Toast.LENGTH_SHORT).show();
+            }
+
         }if (v.getId() == R.id.finalTask){
 
-            if (clickBalanceControl.getBalance() > 10){
+            if (myCount >= 12){
                 if (mInterstitialAd.isLoaded()) {
                     if (timeLeft >9999) {
                         mInterstitialAd.show();
@@ -601,9 +730,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFinish() {
-                dialog.dismiss();
-                Toast.makeText(TaskActivity.this, " Next Task ready for you ", Toast.LENGTH_SHORT).show();
+               progressBar.setVisibility(View.GONE);
                 startActivity(new Intent(TaskActivity.this,TaskActivity.class));
+                Toast.makeText(TaskActivity.this, " Next Task ready for you ", Toast.LENGTH_SHORT).show();
             }
         }.start();
         timeRunning = true;
@@ -613,7 +742,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
     private void updateTimer() {
 
-        dialog.show();
+      progressBar.setVisibility(View.VISIBLE);
         int minutes = (int) (timeLeft /60000);
         int seconds = (int) (timeLeft % 60000 /1000);
         timeText = ""+minutes;
@@ -666,6 +795,20 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         loadRewardedVideoAd();
 
+        mainBalance = mainBalance+5;
+
+        balanceSetUp.AddBalance(mainBalance);
+        String updateBalance = String.valueOf(balanceSetUp.getBalance());
+        myRef.child(uID).child("MainBalance").setValue(updateBalance);
+
+        count++;
+        clickBalanceControl.AddBalance(count);
+        String showBalance = String.valueOf(clickBalanceControl.getBalance());
+        myRef.child(uID).child("LoveBalance").setValue(showBalance);
+
+        progressBar.setVisibility(View.GONE);
+        startStop();
+
     }
 
     @Override
@@ -676,6 +819,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onRewardedVideoAdLeftApplication() {
 
+        warningMethod();
     }
 
     @Override
@@ -684,67 +828,21 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-
-
-    public void RawaedVideo(View view) {
-
-        if (mRewardedVideoAd.isLoaded()) {
-            mRewardedVideoAd.show();
+    private void starStop2() {
+        if (timeRunning2){
+            stopTime2();
         }else {
-            Toast.makeText(this, "Please Try Aging.... ", Toast.LENGTH_SHORT).show();
-        }
-
-
-    }
-
-    private void gameLoaded(){
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(TaskActivity.this);
-
-        builder.setMessage("Great Work ..!" +
-                "\n"+ " Click Ok  For Continue Game ...")
-                .setCancelable(false)
-                .setPositiveButton(" Ok ", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                        startActivity(new Intent(getApplicationContext(),TaskActivity.class));
-                        finish();
-
-
-                    }
-                });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-
-    }
-
-
-
-
-
-
-
-    /*
-
-
-    private void starStop() {
-        if (timeRunning){
-            stopTime();
-        }else {
-            startTime();
+            startTime2();
         }
 
     }
 
-    private void startTime() {
-         countDownTimer = new CountDownTimer(timeLeft,1000) {
+    private void startTime2() {
+         countDownTimer2 = new CountDownTimer(timeLeft2,1000) {
              @Override
              public void onTick(long millisUntilFinished) {
-                  timeLeft =millisUntilFinished;
-                  updateTimer();
+                  timeLeft2 =millisUntilFinished;
+                  updateTimer2();
 
              }
 
@@ -755,44 +853,49 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
                  startActivity(new Intent(TaskActivity.this,TaskActivity.class));
              }
          }.start();
-         timeRunning = true;
-         startBtn.setText("Pause");
+         timeRunning2 = true;
+         //startBtn.setText("Pause");
 
     }
 
-    private void updateTimer() {
-        int minutes = (int) (timeLeft /60000);
-        int seconds = (int) (timeLeft % 60000 /1000);
-        timeText = ""+minutes;
-        timeText += ":";
-        if (seconds <10)timeText += "0";
-        timeText +=seconds;
-        timeTV.setText(timeText);
+    private void updateTimer2() {
 
-
-    }
-
-    private void stopTime() {
-        countDownTimer.cancel();
-        timeRunning = false;
-        startBtn.setText("Start");
-
+        timeTV2.setVisibility(View.VISIBLE);
+        int minutes = (int) (timeLeft2 /60000);
+        int seconds = (int) (timeLeft2 % 60000 /1000);
+        timeText2 = ""+minutes;
+        timeText2 += ":";
+        if (seconds <10)timeText2 += "0";
+        timeText2 +=seconds;
+        timeTV2.setText(timeText2);
 
 
     }
 
-    public void TestMode(View view) {
+    private void stopTime2() {
+        countDownTimer2.cancel();
+        timeRunning2 = false;
+        //startBtn.setText("Start");
 
-        if (timeLeft < 9999){
-
-            Toast.makeText(this, "Test is successful", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(TaskActivity.this,TaskActivity.class));
-
-        }else {
-            Toast.makeText(this, "Test is Field", Toast.LENGTH_SHORT).show();
-        }
 
 
     }
-*/
+
+    private void warningToast(){
+
+        LayoutInflater inflater = getLayoutInflater();
+
+        View toastView = inflater.inflate(R.layout.warning_layout, (ViewGroup) findViewById(R.id.warningToast_id));
+
+        Toast toast = new Toast(TaskActivity.this);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER,0,0);
+        toast.setView(toastView);
+        toast.show();
+
+
+    }
+
+
+
 }

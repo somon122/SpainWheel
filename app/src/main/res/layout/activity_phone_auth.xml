@@ -7,43 +7,40 @@
     tools:context=".PhoneAuth.PhoneAuthActivity">
 
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
+    <com.hbb20.CountryCodePicker
+        android:id="@+id/countryCodePicker_Id"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:weightSum="3"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="52dp"
+        android:layout_weight="1"
+        android:background="#b7f7f7"
+        android:padding="5dp"
+        app:ccp_defaultNameCode="US"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <com.hbb20.CountryCodePicker
-            android:id="@+id/countryCodePicker_Id"
-            android:layout_width="0dp"
-            android:background="#1ac0f7"
-            android:padding="5dp"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            app:ccp_defaultNameCode="US"
-            android:layout_marginRight="2dp"
+    <EditText
+        android:id="@+id/phoneNumber_Id"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="36dp"
+        android:layout_weight="2"
+        android:background="#adebf2"
+        android:ems="10"
+        android:hint=" Enter Phone Number "
+        android:inputType="phone"
+        android:padding="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/countryCodePicker_Id" />
 
-            />
-
-        <EditText
-            android:id="@+id/phoneNumber_Id"
-            android:layout_width="0dp"
-            android:layout_height="50dp"
-            android:padding="10dp"
-            android:layout_weight="2"
-            android:hint=" Enter Phone Number "
-            android:background="#0999f2"
-            android:ems="10"
-            android:inputType="phone" />
-
-    </LinearLayout>
 
     <Button
         android:id="@+id/sentCode_Id"
@@ -51,15 +48,16 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="64dp"
-        android:text="Sent Code"
-        android:textSize="20sp"
-        android:textColor="#f7f7f9"
-        android:padding="10dp"
+        android:layout_marginTop="56dp"
         android:background="#05dc6d"
+        android:padding="10dp"
+        android:text="Sent Code"
+        android:textColor="#f7f7f9"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+        app:layout_constraintTop_toBottomOf="@+id/phoneNumber_Id" />
 
 
 

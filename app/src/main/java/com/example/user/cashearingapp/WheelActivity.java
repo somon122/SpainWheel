@@ -1,12 +1,18 @@
 package com.example.user.cashearingapp;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
@@ -20,6 +26,14 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,7 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Random;
 
-public class WheelActivity extends AppCompatActivity {
+public class WheelActivity extends AppCompatActivity implements View.OnClickListener,RewardedVideoAdListener {
 
     Button tapButton;
     ImageView wheelImage;
@@ -38,16 +52,29 @@ public class WheelActivity extends AppCompatActivity {
     int degree = 0, degree_old = 0;
     private static final float FACTOR = 15f;
     private InterstitialAd mInterstitialAd;
-    ProgressDialog progressDialog;
-    ProgressBar progressBar;
+    private RewardedVideoAd mRewardedVideoAd;
+
+    private ProgressBar progressBar;
 
     FirebaseDatabase database;
     DatabaseReference myRef;
+    FirebaseAuth auth;
+    FirebaseUser user;
+
+    String uId;
+
     BalanceSetUp balanceSetUp;
     ClickBalanceControl clickBalanceControl;
 
     int mainBalance = 0 ;
     int counter = 0;
+    int showCount = 0;
+
+
+    int warningCount;
+    int warningScore;
+    SharedPreferences myScore3;
+
 
 
 
@@ -58,6 +85,12 @@ public class WheelActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("Balance");
+
+        auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
+
+        uId = user.getUid();
+
         balanceSetUp= new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
 
@@ -65,14 +98,11 @@ public class WheelActivity extends AppCompatActivity {
         wheelImage = findViewById(R.id.wheel_id);
         resultView= findViewById(R.id.resultId);
         counterShow= findViewById(R.id.counterShow_Id);
+        tapButton.setVisibility(View.GONE);
 
 
         r = new Random();
-        progressDialog = new ProgressDialog(this);
-        progressDialog.show();
-
-
-
+       progressBar=findViewById(R.id.wheelProgressBar_id);
 
 
         MobileAds.initialize(this,
@@ -81,6 +111,12 @@ public class WheelActivity extends AppCompatActivity {
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
+
+
 
         BalanceControl();
 
@@ -102,14 +138,14 @@ public class WheelActivity extends AppCompatActivity {
                        @Override
                        public void onAnimationStart(Animation animation) {
 
-                           tapButton.setEnabled(false);
+                           tapButton.setVisibility(View.GONE);
 
                        }
 
                        @Override
                        public void onAnimationEnd(Animation animation) {
 
-                           mInterstitialAd.show();
+                           courrentNumber(360 - (degree%360));
 
                        }
 
@@ -126,6 +162,15 @@ public class WheelActivity extends AppCompatActivity {
 
             }
         });
+
+
+        myScore3 = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+        warningCount = myScore3.getInt("warningScore",0);
+
+
+
+
+
 
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
@@ -151,7 +196,7 @@ public class WheelActivity extends AppCompatActivity {
             public void onAdLeftApplication() {
                 // Code to be executed when the user has left the app.
 
-                Toast.makeText(WheelActivity.this, " You are doing Mistake ", Toast.LENGTH_SHORT).show();
+               warningMethod();
             }
 
             @Override
@@ -159,11 +204,8 @@ public class WheelActivity extends AppCompatActivity {
 
                 // Code to be executed when when the interstitial ad is closed.
 
-                //mInterstitialAd.loadAd(new AdRequest.Builder().build());
-                //mainBalance++;
-                //String balance = String.valueOf(mainBalance);
 
-                if (clickBalanceControl.getBalance() >= 10)
+                if (clickBalanceControl.getBalance() >=5)
 
                 {
                     Intent intent = new Intent(WheelActivity.this,Click_Activity.class);
@@ -172,21 +214,54 @@ public class WheelActivity extends AppCompatActivity {
                     finish();
 
                 }else {
-                    courrentNumber(360 - (degree%360));
+                    //courrentNumber(360 - (degree%360));
 
                     balanceSetUp.AddBalance(mainBalance);
                     String updateBalance = String.valueOf(balanceSetUp.getBalance());
-                    myRef.child("MainBalance").setValue(updateBalance);
+                    myRef.child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()){
+                                Toast.makeText(WheelActivity.this, "point is added", Toast.LENGTH_SHORT).show();
+                            }else {
+                                Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
 
 
                     counter++;
+                    //showCount++;
                     clickBalanceControl.AddBalance(counter);
                     String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child("ClickBalance").setValue(updateClickBalance);
+                    myRef.child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()){
+                                Toast.makeText(WheelActivity.this, "Well Done..", Toast.LENGTH_SHORT).show();
+                            }else {
+                                Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
 
-                    tapButton.setEnabled(false);
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
+                    tapButton.setVisibility(View.GONE);
                     //resultView.setText(courrentNumber(360 - (degree%360)));
-                    gameOver();
+                    gameOver(mainBalance);
 
 
                 }
@@ -200,7 +275,7 @@ public class WheelActivity extends AppCompatActivity {
     private void BalanceControl() {
 
 
-        myRef.child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(uId).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -209,7 +284,7 @@ public class WheelActivity extends AppCompatActivity {
                 if (dataSnapshot.exists()){
                     String value = dataSnapshot.getValue(String.class);
                     balanceSetUp.setBalance(Integer.parseInt(value));
-                    resultView.setText("Balance : "+balanceSetUp.getBalance());
+                    resultView.setText("Score : "+balanceSetUp.getBalance());
 
                 }/*else {
                     Toast.makeText(WheelActivity.this, " Data is Empty", Toast.LENGTH_SHORT).show();
@@ -227,7 +302,7 @@ public class WheelActivity extends AppCompatActivity {
         });
 
 
-        myRef.child("ClickBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(uId).child("ClickBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -254,12 +329,6 @@ public class WheelActivity extends AppCompatActivity {
         });
 
 
-
-
-
-
-
-
     }
 
     @Override
@@ -272,12 +341,12 @@ public class WheelActivity extends AppCompatActivity {
 
     private void adIsLoaded() {
 
-        if (mInterstitialAd.isLoaded()){
+        if (mInterstitialAd.isLoaded()&& mRewardedVideoAd.isLoaded()){
 
-            tapButton.setEnabled(true);
-            progressDialog.dismiss();
+            tapButton.setVisibility(View.VISIBLE);
+           progressBar.setVisibility(View.GONE);
         }else {
-
+            progressBar.setVisibility(View.GONE);
             Toast.makeText(this, "Please Check your Net Connections", Toast.LENGTH_SHORT).show();
         }
 
@@ -288,82 +357,71 @@ public class WheelActivity extends AppCompatActivity {
 
               if (degrees >= (FACTOR *1) && degrees < (FACTOR * 3)){
 
-                  //text =  "02 green";
                   mainBalance = mainBalance+2;
-                  //resultView.setText("MainBalance : "+mainBalance);
-
+                  mInterstitialAd.show();
 
             } if (degrees >= (FACTOR *3) && degrees < (FACTOR * 5)){
 
-            //text =  "03 green";
             mainBalance = mainBalance+3;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mInterstitialAd.show();
 
             } if (degrees >= (FACTOR *5) && degrees < (FACTOR * 7)){
 
-
-            //text =  "04 green";
             mainBalance = mainBalance+4;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mInterstitialAd.show();
 
             } if (degrees >= (FACTOR *7) && degrees < (FACTOR * 9)){
 
-            //text =  "05 green";
             mainBalance = mainBalance+5;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mInterstitialAd.show();
 
             } if (degrees >= (FACTOR *9) && degrees < (FACTOR * 11)){
 
-            //text =  "06 green";
             mainBalance = mainBalance+6;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mRewardedVideoAd.show();
+
 
             } if (degrees >= (FACTOR *11) && degrees < (FACTOR * 13)){
 
-            //text =  "07 green";
             mainBalance = mainBalance+7;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mInterstitialAd.show();
+
 
             } if (degrees >= (FACTOR *13) && degrees < (FACTOR * 15)){
 
-            //text =  "08 green";
             mainBalance = mainBalance+8;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mRewardedVideoAd.show();
+
 
             } if (degrees >= (FACTOR *15) && degrees < (FACTOR * 17)){
 
-            //text =  "09 green";
+
             mainBalance = mainBalance+9;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mRewardedVideoAd.show();
 
             } if (degrees >= (FACTOR *17) && degrees < (FACTOR * 19)){
 
-            //text =  "10 green";
             mainBalance = mainBalance+10;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mInterstitialAd.show();
+
 
             } if (degrees >= (FACTOR *19) && degrees < (FACTOR * 21)){
 
-
-            //text =  "11 green";
             mainBalance = mainBalance+11;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mRewardedVideoAd.show();
 
             } if (degrees >= (FACTOR *21) && degrees < (FACTOR * 23)){
 
-
-            //text =  "12 green";
             mainBalance = mainBalance+12;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mRewardedVideoAd.show();
 
             }
 
         if ((degrees >= (FACTOR * 23 ) && degrees < 360) || (degrees >= 0 && degrees < (FACTOR * 1)))
         {
 
-            //text = "1";
             mainBalance = mainBalance+1;
-            //resultView.setText("MainBalance : "+mainBalance);
+            mInterstitialAd.show();
         }
 
         return text;
@@ -371,17 +429,18 @@ public class WheelActivity extends AppCompatActivity {
     }
 
 
-    private void gameOver(){
+    private void gameOver(int score){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(WheelActivity.this);
 
-        builder.setMessage(" Great Work ...!" +
-                "\n"+" Click Ok For Continue Game ..." +
+        builder.setMessage("Congratulation..!"+"\n\n"+"You Got : "+score+" point"+
+                "\n\n"+" Click Ok For Continue Game ..." +
                 "\n")
                 .setCancelable(false)
                 .setPositiveButton(" Ok ", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
 
                         startActivity(new Intent(getApplicationContext(),WheelActivity.class));
                         finish();
@@ -395,4 +454,165 @@ public class WheelActivity extends AppCompatActivity {
 
 
     }
+
+
+    private void loadRewardedVideoAd() {
+
+        mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
+                new AdRequest.Builder().build());
+    }
+
+    @Override
+    public void onClick(View v) {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdLoaded() {
+
+        adIsLoaded();
+
+    }
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+
+    }
+
+    @Override
+    public void onRewardedVideoStarted() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
+
+        if (clickBalanceControl.getBalance() >=5)
+
+        {
+            Intent intent = new Intent(WheelActivity.this,Click_Activity.class);
+            intent.putExtra("click","wheel");
+            startActivity(intent);
+            finish();
+
+        }else {
+            //courrentNumber(360 - (degree%360));
+
+            balanceSetUp.AddBalance(mainBalance);
+            String updateBalance = String.valueOf(balanceSetUp.getBalance());
+            myRef.child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+                        Toast.makeText(WheelActivity.this, "point is added", Toast.LENGTH_SHORT).show();
+                    }else {
+                        Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+
+
+            counter++;
+            clickBalanceControl.AddBalance(counter);
+            String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
+            myRef.child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+                        Toast.makeText(WheelActivity.this, "Well Done..", Toast.LENGTH_SHORT).show();
+                    }else {
+                        Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+
+            tapButton.setVisibility(View.GONE);
+            gameOver(mainBalance);
+
+        }
+
+    }
+
+    @Override
+    public void onRewarded(RewardItem rewardItem) {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {
+
+        Toast.makeText(this, "You are mistake...", Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int i) {
+
+    }
+
+    private void warningMethod() {
+
+
+        if (warningCount>=3){
+
+            mainBalance = mainBalance-10;
+            balanceSetUp.Withdraw(mainBalance);
+            String updateBalance = String.valueOf(balanceSetUp.getBalance());
+            myRef.child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+
+                        Toast.makeText(WheelActivity.this, "10 point is Minus...!\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
+                    }else {
+
+
+                    }
+                }
+            });
+
+        }else {
+
+            warningToast();
+            warningScore++;
+            myScore3 = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = myScore3.edit();
+            editor.putInt("warningScore",warningScore);
+            editor.commit();
+
+        }
+
+    }
+
+    private void warningToast(){
+
+        LayoutInflater inflater = getLayoutInflater();
+
+        View toastView = inflater.inflate(R.layout.warning_layout, (ViewGroup) findViewById(R.id.warningToast_id));
+
+        Toast toast = new Toast(WheelActivity.this);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER,0,0);
+        toast.setView(toastView);
+        toast.show();
+
+
+    }
+
+
+
 }
