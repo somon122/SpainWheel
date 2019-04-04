@@ -55,6 +55,7 @@ public class Click_Activity extends AppCompatActivity {
     int mainScore=0;
 
     String uID;
+    String phoneNo;
 
 
 
@@ -68,7 +69,7 @@ public class Click_Activity extends AppCompatActivity {
 
 
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("Balance");
+        myRef = database.getReference("UserBalance");
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
@@ -79,6 +80,7 @@ public class Click_Activity extends AppCompatActivity {
        progressBar = findViewById(R.id.clickProgressBar_id);
 
         uID = user.getUid();
+        phoneNo = user.getPhoneNumber();
 
 
 
@@ -180,7 +182,7 @@ public class Click_Activity extends AppCompatActivity {
     private void clickScoreControl(){
 
         if (getValue.equals("wheel")){
-            myRef.child(uID).child("ClickBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child(phoneNo).child(uID).child("ClickBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -201,7 +203,7 @@ public class Click_Activity extends AppCompatActivity {
 
         }  else if (getValue.equals("love")){
 
-            myRef.child(uID).child("LoveBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child(phoneNo).child(uID).child("LoveBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -221,7 +223,7 @@ public class Click_Activity extends AppCompatActivity {
 
 
         }  else if (getValue.equals("question")){
-            myRef.child(uID).child("QuestionBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child(phoneNo).child(uID).child("QuestionBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -253,7 +255,7 @@ public class Click_Activity extends AppCompatActivity {
 
         clickBalanceControl.AddBalance(clickScore);
         String updateScore= String.valueOf(clickBalanceControl.getBalance());
-        myRef.child(uID).child("ClickCount").setValue(updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+        myRef.child(phoneNo).child(uID).child("ClickCount").setValue(updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()){
@@ -272,7 +274,7 @@ public class Click_Activity extends AppCompatActivity {
 
         balanceSetUp.AddBalance(mainScore);
         String MainBalance_updateScore= String.valueOf(balanceSetUp.getBalance());
-        myRef.child(uID).child("MainBalance").setValue(MainBalance_updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+        myRef.child(phoneNo).child(uID).child("MainBalance").setValue(MainBalance_updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()){
@@ -303,7 +305,7 @@ public class Click_Activity extends AppCompatActivity {
     private void balanceControl() {
 
 
-        myRef.child(uID).child("ClickCount").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNo).child(uID).child("ClickCount").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -322,7 +324,7 @@ public class Click_Activity extends AppCompatActivity {
             }
         });
 
-        myRef.child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 

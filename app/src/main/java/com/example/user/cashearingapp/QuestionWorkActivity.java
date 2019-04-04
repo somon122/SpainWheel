@@ -61,6 +61,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
     int mainBalance = 0 ;
     String uID;
+    String phoneNo;
 
     SharedPreferences myScore3;
     int warningCount = 0;
@@ -77,8 +78,10 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
         progressBar.setVisibility(View.VISIBLE);
 
+        phoneNo = user.getPhoneNumber();
 
-        myRef.child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+
+        myRef.child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -105,7 +108,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
         });
 
 
-        myRef.child(uID).child("QuestionBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNo).child(uID).child("QuestionBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -184,12 +187,12 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
                     mainBalance++;
                     balanceSetUp.AddBalance(mainBalance);
                     String updateScore = String.valueOf(balanceSetUp.getBalance());
-                    myRef.child(uID).child("MainBalance").setValue(updateScore);
+                    myRef.child(phoneNo).child(uID).child("MainBalance").setValue(updateScore);
 
                     showScore++;
                     clickBalanceControl.AddBalance(mainBalance);
                     String updateShowScore = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child(uID).child("QuestionBalance").setValue(updateShowScore);
+                    myRef.child(phoneNo).child(uID).child("QuestionBalance").setValue(updateShowScore);
 
                     //score.setText("Score: "+mScore);
                     updateQuestion(r.nextInt(mQuestionsLenght));
@@ -213,7 +216,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
             mainBalance = mainBalance-10;
             balanceSetUp.Withdraw(mainBalance);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
-            myRef.child(uID).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -266,7 +269,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
     private void initialized() {
 
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("Balance");
+        myRef = database.getReference("UserBalance");
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();

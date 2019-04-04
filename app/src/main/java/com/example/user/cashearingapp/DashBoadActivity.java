@@ -12,11 +12,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class DashBoadActivity extends AppCompatActivity {
 
 
     private TextView nameTV,balanceTV,phoneTV,withdrawTV,pointTV;
+    private CircleImageView circleImageShow;
 
     private String phoneNumber,name,withdrawall;
     private int balance,point;
@@ -48,15 +52,19 @@ public class DashBoadActivity extends AppCompatActivity {
         user = auth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
 
-        myRef = database.getReference("Balance");
+        circleImageShow = findViewById(R.id.circleImageShowId);
+
+        myRef = database.getReference("UserBalance");
 
         balanceSetUp = new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
 
+        phoneNumber = user.getPhoneNumber();
+
         if (user != null) {
             uID = user.getUid();
             loadInfo();
-            phoneTV.setText(user.getPhoneNumber());
+            phoneTV.setText(phoneNumber);
 
         }else {
             Toast.makeText(this, "Check your Net connection", Toast.LENGTH_SHORT).show();
@@ -68,7 +76,7 @@ public class DashBoadActivity extends AppCompatActivity {
     private void loadInfo(){
 
 
-        myRef.child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNumber).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -92,7 +100,7 @@ public class DashBoadActivity extends AppCompatActivity {
 
             }
         });
-        myRef.child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNumber).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -115,7 +123,7 @@ public class DashBoadActivity extends AppCompatActivity {
 
             }
         });
-        myRef.child(uID).child("AccountInfo").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNumber).child(uID).child("AccountInfo").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -125,6 +133,7 @@ public class DashBoadActivity extends AppCompatActivity {
 
                     AccountInfo accountInfo = dataSnapshot.getValue(AccountInfo.class);
                     nameTV.setText(accountInfo.getUserName());
+                    Picasso.get().load(accountInfo.getImageUrl()).placeholder(R.drawable.account).into(circleImageShow);
 
 
                 }else {

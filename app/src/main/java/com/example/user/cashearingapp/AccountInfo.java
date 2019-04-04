@@ -6,12 +6,14 @@ public class AccountInfo {
     private String userName;
     private String userPassword;
     private String birthDay;
+    private String imageUrl;
 
-    public AccountInfo(String userId, String userName, String userPassword, String birthDay) {
+    public AccountInfo(String userId, String userName, String userPassword, String birthDay, String imageUrl) {
         this.userId = userId;
         this.userName = userName;
         this.userPassword = userPassword;
         this.birthDay = birthDay;
+        this.imageUrl = imageUrl;
     }
 
     public AccountInfo() {
@@ -47,5 +49,13 @@ public class AccountInfo {
 
     public void setBirthDay(String birthDay) {
         this.birthDay = birthDay;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }

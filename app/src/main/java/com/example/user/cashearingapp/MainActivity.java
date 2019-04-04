@@ -27,6 +27,7 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.user.cashearingapp.PhoneAuth.PhoneAuthActivity;
+import com.example.user.cashearingapp.PhoneAuth.PhoneAuthConfirmActivity;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity
     private TextView deviceId,timeShowTV;
     TimePicker timePicker;
     ProgressBar progressBar;
+    int backSpaceCount = 0;
 
     FloatingActionButton rulesButton, wheelButton,quziButton,loveButton;
 
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity
     long timeLeft = 30000;
     boolean timeRunning;
     String timeText;
+    String phoneNo;
 
 
     FloatingActionMenu floatingActionMenu;
@@ -82,6 +85,8 @@ public class MainActivity extends AppCompatActivity
         initilized();
         timeShowTV.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
+        phoneNo = user.getPhoneNumber();
+
 
         Bundle bundle = getIntent().getExtras();
 
@@ -91,28 +96,40 @@ public class MainActivity extends AppCompatActivity
 
         }
 
+        pointLoad();
 
+
+
+
+    }
+
+
+    //---------- OnCreate is End point -----------------
+
+    private void pointLoad(){
 
 
         if (haveNetwork()){
 
             if (user != null) {
 
-                myRef.child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+                myRef.child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // This method is called once with the initial value and again
                         // whenever data at this location is updated.
-
                         if (dataSnapshot.exists()){
+
                             progressBar.setVisibility(View.GONE);
                             String value = dataSnapshot.getValue(String.class);
                             balanceSetUp.setBalance(Integer.parseInt(value));
-
+                            Toast.makeText(MainActivity.this, ""+balanceSetUp.getBalance(), Toast.LENGTH_SHORT).show();
 
                         }else {
-                            Toast.makeText(MainActivity.this, " Data is loading...", Toast.LENGTH_SHORT).show();
+                            progressBar.setVisibility(View.GONE);
+
                         }
+
 
                     }
 
@@ -122,8 +139,7 @@ public class MainActivity extends AppCompatActivity
 
                     }
                 });
-
-                myRef.child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
+                myRef.child(phoneNo).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // This method is called once with the initial value and again
@@ -152,13 +168,7 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(this, " Please Check your Net connection", Toast.LENGTH_SHORT).show();
         }
 
-
-
     }
-
-
-    //---------- OnCreate is End point -----------------
-
 
     private void initilized(){
 
@@ -178,7 +188,7 @@ public class MainActivity extends AppCompatActivity
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("Balance");
+        myRef = database.getReference("UserBalance");
         balanceSetUp = new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
 
@@ -233,13 +243,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        backSpaceCount++;
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
 
-            if (timeLeft > 299999){
-                super.onBackPressed();
+            if (backSpaceCount==2){
+                backSpassAlert();
             }else {
                 Toast.makeText(this, "please Waiting....", Toast.LENGTH_SHORT).show();
             }
@@ -277,6 +288,8 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+
+
         int id = item.getItemId();
 
         if (id == R.id.love2_id) {
@@ -316,7 +329,7 @@ public class MainActivity extends AppCompatActivity
 
 
         } else if (id == R.id.aboutMe_id) {
-
+            startActivity(new Intent(MainActivity.this, PhoneAuthConfirmActivity.class));
 
 
         }else if (id == R.id.logOut_id2) {
@@ -341,17 +354,17 @@ public class MainActivity extends AppCompatActivity
             if (balanceSetUp.getBalance() >= 5){
                 balanceSetUp.Withdraw(5);
                 String updateScore = String.valueOf(balanceSetUp.getBalance());
-                myRef.child(uID).child("MainBalance").setValue(updateScore);
+                myRef.child(phoneNo).child(uID).child("MainBalance").setValue(updateScore);
 
                 clickBalanceControl.AddBalance(500);
                 String updateBalance = String.valueOf(clickBalanceControl.getBalance());
-                myRef.child(uID).child("ConvertBalance").setValue(updateBalance);
+                myRef.child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance);
 
                 convertAlert();
 
 
             }else {
-                Toast.makeText(this, "Sorry..! You don't have enough point", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Sorry..! You don't have enough point"+balanceSetUp.getBalance(), Toast.LENGTH_SHORT).show();
             }
 
 
@@ -432,6 +445,25 @@ public class MainActivity extends AppCompatActivity
                     public void onClick(DialogInterface dialog, int which) {
 
 
+
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+
+    }
+ private void backSpassAlert(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+
+        builder.setMessage("Are you Sure to exit..!")
+                .setCancelable(false)
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                       finish();
 
                     }
                 });

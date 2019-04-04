@@ -62,6 +62,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     FirebaseUser user;
 
     String uId;
+    String phoneNo;
 
     BalanceSetUp balanceSetUp;
     ClickBalanceControl clickBalanceControl;
@@ -84,7 +85,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_wheel);
 
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("Balance");
+        myRef = database.getReference("UserBalance");
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
@@ -99,6 +100,8 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         resultView= findViewById(R.id.resultId);
         counterShow= findViewById(R.id.counterShow_Id);
         tapButton.setVisibility(View.GONE);
+
+        phoneNo = user.getPhoneNumber();
 
 
         r = new Random();
@@ -218,7 +221,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
                     balanceSetUp.AddBalance(mainBalance);
                     String updateBalance = String.valueOf(balanceSetUp.getBalance());
-                    myRef.child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    myRef.child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()){
@@ -241,7 +244,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                     //showCount++;
                     clickBalanceControl.AddBalance(counter);
                     String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    myRef.child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()){
@@ -275,7 +278,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     private void BalanceControl() {
 
 
-        myRef.child(uId).child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNo).child(uId).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -302,7 +305,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         });
 
 
-        myRef.child(uId).child("ClickBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child(phoneNo).child(uId).child("ClickBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -500,7 +503,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
             balanceSetUp.AddBalance(mainBalance);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
-            myRef.child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -522,7 +525,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             counter++;
             clickBalanceControl.AddBalance(counter);
             String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
-            myRef.child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -572,7 +575,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             mainBalance = mainBalance-10;
             balanceSetUp.Withdraw(mainBalance);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
-            myRef.child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
