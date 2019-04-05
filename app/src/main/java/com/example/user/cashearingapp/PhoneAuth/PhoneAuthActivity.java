@@ -32,10 +32,6 @@ public class PhoneAuthActivity extends AppCompatActivity {
     FirebaseDatabase database;
     DatabaseReference myRef;
 
-    String deviceId;
-    String id;
-    String checkPhone;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,9 +47,7 @@ public class PhoneAuthActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("message");
 
-        //deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        //authCheck();
-        //Toast.makeText(PhoneAuthActivity.this, id+"\n"+checkPhone, Toast.LENGTH_LONG).show();
+
 
         sentCodeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,34 +69,6 @@ public class PhoneAuthActivity extends AppCompatActivity {
 
 
 
-
-    private void authCheck(){
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-
-                    AuthCheck check =snapshot.getValue(AuthCheck.class);
-
-                    id = check.getDeviceId();
-                    checkPhone = check.getPhoneNumber();
-
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-
-            }
-        });
-
-    }
-
     private void phoneAuthentication(){
         countryCodeNumber = countryCodePicker.getFullNumberWithPlus();
         String phoneNumber = phoneNumberET.getText().toString().trim();
@@ -113,42 +79,13 @@ public class PhoneAuthActivity extends AppCompatActivity {
             phoneNumberET.requestFocus();
             return;
         }else {
-            //String phoneCheck = phoneNumberET.getText().toString().trim();
             String number = countryCodeNumber+phoneNumber;
-            //myRef.setValue(phoneNumber);
             Intent intent = new Intent(PhoneAuthActivity.this,PhoneAuthConfirmActivity.class);
             intent.putExtra("phoneNumber",number);
             startActivity(intent);
 
             Toast.makeText(PhoneAuthActivity.this, " Welcome New User", Toast.LENGTH_SHORT).show();
 
-
-
- /*           if (deviceId.equals(id)){
-                if (phoneNumberET.getText().toString().trim().contains(checkPhone))
-                {
-                    String number = countryCodeNumber+phoneNumber;
-                    Intent intent = new Intent(PhoneAuthActivity.this,PhoneAuthConfirmActivity.class);
-                    intent.putExtra("phoneNumber",number);
-                    startActivity(intent);
-
-                }else {
-                    Toast.makeText(PhoneAuthActivity.this, " Your Phone Number could not match", Toast.LENGTH_SHORT).show();
-                }
-
-            }else {
-                String phoneCheck = phoneNumberET.getText().toString().trim();
-                AuthCheck authCheck = new AuthCheck(deviceId,phoneCheck);
-                String number = countryCodeNumber+phoneNumber;
-                myRef.setValue(authCheck);
-                Intent intent = new Intent(PhoneAuthActivity.this,PhoneAuthConfirmActivity.class);
-                intent.putExtra("phoneNumber",number);
-                startActivity(intent);
-
-                Toast.makeText(PhoneAuthActivity.this, " Welcome New User", Toast.LENGTH_SHORT).show();
-
-
-            }*/
 
         }
 

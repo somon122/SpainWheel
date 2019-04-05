@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.user.cashearingapp.PhoneAuth.PhoneAuthActivity;
@@ -25,6 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FieldValue;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -65,6 +67,8 @@ public class WithdrawActivity extends AppCompatActivity {
     int rechargeAmount;
 
     String phoneNo;
+    String time;
+    String pushId;
 
     private ProgressDialog progressDialog;
 
@@ -85,6 +89,7 @@ public class WithdrawActivity extends AppCompatActivity {
         clickBalanceControl = new ClickBalanceControl();
         if (user != null){
             uID = user.getUid();
+            pushId=myRef.push().getKey();
 
         }
         constraintLayout1 = findViewById(R.id.paypalConstraintLayout_id);
@@ -117,8 +122,11 @@ public class WithdrawActivity extends AppCompatActivity {
         progressDialog.show();
 
 
+        time = currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
 
-        myRef.child(phoneNo).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
+
+
+        myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -194,35 +202,37 @@ public class WithdrawActivity extends AppCompatActivity {
 
 
             paypleAddress = paypalAddressET.getText().toString().trim();
-            String paypalAmount = paypalAmountET.getText().toString().trim();
+            final String requestAmount = paypalAmountET.getText().toString().trim();
 
             if (paypleAddress.isEmpty() ){
 
                 paypalAddressET.setError("Please Enter PayPal Address");
 
 
-            }else  if (paypalAmount.isEmpty()){
+            }else  if (requestAmount.isEmpty()){
                 paypalAmountET.setError("Please Enter PayPal Address");
 
 
             } else {
 
                 progressDialog.show();
-                payPalAmount = Integer.parseInt(paypalAmount);
+                payPalAmount = Integer.parseInt(requestAmount);
                 if (clickBalanceControl.getBalance() >=payPalAmount){
 
                     clickBalanceControl.Withdraw(payPalAmount);
                     String updateBalance = String.valueOf(clickBalanceControl.getBalance());
 
-                    myRef.child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).
+                    myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).
                             addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
                             if (task.isSuccessful()){
 
-                                submit = new WithdrawSubmit(paypleAddress,payPalAmount);
-                                myRef.child(phoneNo).child(uID).child("Withdraw").child("PayPal").child(currentDateTimeString).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                String payPal= "PayPal";
+
+                                submit = new WithdrawSubmit(time,phoneNo,payPal,paypleAddress,requestAmount);
+                                myRef.child("Withdraw").child(pushId).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 
@@ -267,7 +277,7 @@ public class WithdrawActivity extends AppCompatActivity {
 
 
             bKashNumber = bKashNumberET.getText().toString().trim();
-            String amount = bKashAmountET.getText().toString().trim();
+            final String amount = bKashAmountET.getText().toString().trim();
 
             if (bKashNumber.isEmpty() ){
 
@@ -285,14 +295,15 @@ public class WithdrawActivity extends AppCompatActivity {
                 if (clickBalanceControl.getBalance() >=bKashAmount){
                     clickBalanceControl.Withdraw(bKashAmount);
                     String updateBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
                             if (task.isSuccessful()){
+                                String bKish= "BKash";
 
-                                submit = new WithdrawSubmit(bKashNumber,bKashAmount);
-                                myRef.child(phoneNo).child(uID).child("Withdraw").child("BKash").child(currentDateTimeString).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                submit = new WithdrawSubmit(time,phoneNo,bKish,bKashNumber,amount);
+                                myRef.child("Withdraw").child(pushId).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 
@@ -339,31 +350,34 @@ public class WithdrawActivity extends AppCompatActivity {
         else if (spinnerValue.equals("Rocket")){
 
             rocketNumber = rocketNumberET.getText().toString().trim();
-            String amount = rocketAmountET.getText().toString().trim();
+            final String Ramount = rocketAmountET.getText().toString().trim();
 
             if (rocketNumber.isEmpty() ){
 
                 rocketNumberET.setError("Please Enter PayPal Address");
 
 
-            }else  if (amount.isEmpty()){
+            }else  if (Ramount.isEmpty()){
                 rocketAmountET.setError("Please Enter PayPal Address");
 
 
             } else {
 
                 progressDialog.show();
-                rocketAmount = Integer.parseInt(amount);
+                rocketAmount = Integer.parseInt(Ramount);
                 if (clickBalanceControl.getBalance() >=rocketAmount){
                     clickBalanceControl.Withdraw(rocketAmount);
                     String updateBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
                             if (task.isSuccessful()){
-                                submit = new WithdrawSubmit(rocketNumber,rocketAmount);
-                                myRef.child(phoneNo).child(uID).child("Withdraw").child("Rocket").child(currentDateTimeString).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                                String rocket= "Rocket";
+
+                                submit = new WithdrawSubmit(time,phoneNo,rocket,rocketNumber,Ramount);
+                                myRef.child("Withdraw").child(pushId).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 
@@ -409,31 +423,34 @@ public class WithdrawActivity extends AppCompatActivity {
 
 
             rechargeNumber = mobileReNumberET.getText().toString().trim();
-            String amount = mobileReAmount.getText().toString().trim();
+            final String MRamount = mobileReAmount.getText().toString().trim();
 
             if (rechargeNumber.isEmpty() ){
 
                 mobileReNumberET.setError("Please Enter PayPal Address");
 
 
-            }else  if (amount.isEmpty()){
+            }else  if (MRamount.isEmpty()){
                 mobileReAmount.setError("Please Enter PayPal Address");
 
 
             } else {
 
                 progressDialog.show();
-                rechargeAmount = Integer.parseInt(amount);
+                rechargeAmount = Integer.parseInt(MRamount);
                 if (clickBalanceControl.getBalance() >=rechargeAmount){
                     clickBalanceControl.Withdraw(rechargeAmount);
                     String updateBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
                             if (task.isSuccessful()){
-                                submit = new WithdrawSubmit(rechargeNumber,rechargeAmount);
-                                myRef.child(phoneNo).child(uID).child("Withdraw").child("MobileRecharge").child(currentDateTimeString).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+                                String rocket= "Rocket";
+
+                                submit = new WithdrawSubmit(time,phoneNo,rocket,rechargeNumber,MRamount);
+                                myRef.child("Withdraw").child(pushId).setValue(submit).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 

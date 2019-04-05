@@ -19,8 +19,6 @@ public class ClickBalanceControl {
 
     }
 
-
-
     public ClickBalanceControl() {
     }
 

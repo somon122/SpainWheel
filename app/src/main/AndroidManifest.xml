@@ -42,14 +42,14 @@
         <activity android:name=".WithdrawActivity" />
         <activity android:name=".DashBoadActivity" />
 
-        <service android:name=".MyFirebaseInstanceIdService">
+        <service android:name=".PushNotification.MyFirebaseInstanceIdService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 
         <service
-            android:name=".MyFirebaseMassagingService"
+            android:name=".PushNotification.MyFirebaseMassagingService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

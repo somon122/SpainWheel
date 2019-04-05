@@ -221,7 +221,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
                     balanceSetUp.AddBalance(mainBalance);
                     String updateBalance = String.valueOf(balanceSetUp.getBalance());
-                    myRef.child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    myRef.child("Users").child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()){
@@ -244,7 +244,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                     //showCount++;
                     clickBalanceControl.AddBalance(counter);
                     String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()){
@@ -278,7 +278,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     private void BalanceControl() {
 
 
-        myRef.child(phoneNo).child(uId).child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNo).child(uId).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -305,7 +305,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         });
 
 
-        myRef.child(phoneNo).child(uId).child("ClickBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -503,7 +503,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
             balanceSetUp.AddBalance(mainBalance);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
-            myRef.child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child("Users").child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -525,7 +525,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             counter++;
             clickBalanceControl.AddBalance(counter);
             String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
-            myRef.child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -575,7 +575,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             mainBalance = mainBalance-10;
             balanceSetUp.Withdraw(mainBalance);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
-            myRef.child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child("Users").child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){

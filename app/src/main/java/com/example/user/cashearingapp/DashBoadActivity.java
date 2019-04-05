@@ -76,7 +76,7 @@ public class DashBoadActivity extends AppCompatActivity {
     private void loadInfo(){
 
 
-        myRef.child(phoneNumber).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNumber).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -100,7 +100,7 @@ public class DashBoadActivity extends AppCompatActivity {
 
             }
         });
-        myRef.child(phoneNumber).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNumber).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -123,7 +123,7 @@ public class DashBoadActivity extends AppCompatActivity {
 
             }
         });
-        myRef.child(phoneNumber).child(uID).child("AccountInfo").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNumber).child(uID).child("AccountInfo").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again

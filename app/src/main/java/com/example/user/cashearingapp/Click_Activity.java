@@ -182,7 +182,7 @@ public class Click_Activity extends AppCompatActivity {
     private void clickScoreControl(){
 
         if (getValue.equals("wheel")){
-            myRef.child(phoneNo).child(uID).child("ClickBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child("Users").child(phoneNo).child(uID).child("ClickBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -203,7 +203,7 @@ public class Click_Activity extends AppCompatActivity {
 
         }  else if (getValue.equals("love")){
 
-            myRef.child(phoneNo).child(uID).child("LoveBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child("Users").child(phoneNo).child(uID).child("LoveBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -223,7 +223,7 @@ public class Click_Activity extends AppCompatActivity {
 
 
         }  else if (getValue.equals("question")){
-            myRef.child(phoneNo).child(uID).child("QuestionBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child("Users").child(phoneNo).child(uID).child("QuestionBalance").removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -255,12 +255,24 @@ public class Click_Activity extends AppCompatActivity {
 
         clickBalanceControl.AddBalance(clickScore);
         String updateScore= String.valueOf(clickBalanceControl.getBalance());
-        myRef.child(phoneNo).child(uID).child("ClickCount").setValue(updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+        myRef.child("Users").child(phoneNo).child(uID).child("ClickCount").setValue(updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()){
 
-                    Toast.makeText(Click_Activity.this, "", Toast.LENGTH_SHORT).show();
+                    balanceSetUp.AddBalance(mainScore);
+                    String MainBalance_updateScore= String.valueOf(balanceSetUp.getBalance());
+                    myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(MainBalance_updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()){
+                                Toast.makeText(Click_Activity.this, "Well Done..! \nYour get 10 bonus point..", Toast.LENGTH_SHORT).show();
+                            }else {
+                                Toast.makeText(Click_Activity.this, "Try Again", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
 
                 }
 
@@ -272,18 +284,6 @@ public class Click_Activity extends AppCompatActivity {
             }
         });
 
-        balanceSetUp.AddBalance(mainScore);
-        String MainBalance_updateScore= String.valueOf(balanceSetUp.getBalance());
-        myRef.child(phoneNo).child(uID).child("MainBalance").setValue(MainBalance_updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()){
-                    Toast.makeText(Click_Activity.this, "Well Done..! \nYour get 10 bonus point..", Toast.LENGTH_SHORT).show();
-                }else {
-                    Toast.makeText(Click_Activity.this, "Try Again", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
 
 
     }
@@ -305,7 +305,7 @@ public class Click_Activity extends AppCompatActivity {
     private void balanceControl() {
 
 
-        myRef.child(phoneNo).child(uID).child("ClickCount").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNo).child(uID).child("ClickCount").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
@@ -324,7 +324,7 @@ public class Click_Activity extends AppCompatActivity {
             }
         });
 
-        myRef.child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 

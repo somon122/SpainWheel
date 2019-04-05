@@ -37,7 +37,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class TaskActivity extends AppCompatActivity implements View.OnClickListener,RewardedVideoAdListener {
+public class TaskActivity extends AppCompatActivity implements View.OnClickListener {
 
     TextView timeTV2;
     Button startBtn;
@@ -116,14 +116,14 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        mRewardedVideoAd.setRewardedVideoAdListener(this);
-        loadRewardedVideoAd();
+      /*  mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(this);*/
+        //loadRewardedVideoAd();
 
         initialized();
 
 
-        myRef.child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -150,7 +150,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        myRef.child(phoneNo).child(uID).child("LoveBalance").addValueEventListener(new ValueEventListener() {
+        myRef.child("Users").child(phoneNo).child(uID).child("LoveBalance").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -163,7 +163,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
                     counterId.setText("Show: "+clickBalanceControl.getBalance());
 
                 }else {
-                    Toast.makeText(TaskActivity.this, "Data Empty..", Toast.LENGTH_SHORT).show();
+
                 }
 
 
@@ -177,9 +177,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         });
         myScore = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
         myCount = myScore.getInt("score",0);
-
-        Toast.makeText(this, ""+myCount, Toast.LENGTH_SHORT).show();
-
 
         myScore3 = this.getSharedPreferences("YourWarningScore", Context.MODE_PRIVATE);
         warningCount = myScore3.getInt("warningScore",0);
@@ -256,7 +253,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
                         clickBalanceControl.AddBalance(count);
                         String showBalance = String.valueOf(clickBalanceControl.getBalance());
-                        myRef.child(phoneNo).child(uID).child("LoveBalance").setValue(showBalance);
+                        myRef.child("Users").child(phoneNo).child(uID).child("LoveBalance").setValue(showBalance);
 
                         progressBar.setVisibility(View.VISIBLE);
                         re_Loaded();
@@ -279,7 +276,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         balanceSetUp.AddBalance(mainBalance);
         String updateBalance = String.valueOf(balanceSetUp.getBalance());
-        myRef.child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance);
+        myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance);
     }
 
     private void warningMethod() {
@@ -289,7 +286,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             mainBalance = mainBalance-10;
             balanceSetUp.Withdraw(mainBalance);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
-            myRef.child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+            myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
@@ -583,9 +580,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         } if (v.getId() == R.id.task3){
             if (myCount ==2){
-                if (mRewardedVideoAd.isLoaded()) {
+                if (mInterstitialAd.isLoaded()) {
                     if (timeLeft <9999 ) {
-                        mRewardedVideoAd.show();
+                        mInterstitialAd.show();
                         task3.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -616,9 +613,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         }if (v.getId() == R.id.task5){
             if (myCount == 4) {
-                if (mRewardedVideoAd.isLoaded()) {
+                if (mInterstitialAd.isLoaded()) {
                     if (timeLeft <9999) {
-                        mRewardedVideoAd.show();
+                        mInterstitialAd.show();
                         task5.setBackgroundResource(R.drawable.full_love);
                     }
                 } else {
@@ -647,9 +644,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }if (v.getId() == R.id.task7){
 
             if (myCount == 6) {
-                if (mRewardedVideoAd.isLoaded()) {
+                if (mInterstitialAd.isLoaded()) {
                     if (timeLeft <9999) {
-                        mRewardedVideoAd.show();
+                        mInterstitialAd.show();
                         task7.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -677,10 +674,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         }if (v.getId() == R.id.task9){
             if (myCount == 8) {
-                if (mRewardedVideoAd.isLoaded()) {
+                if (mInterstitialAd.isLoaded()) {
 
                     if (timeLeft <9999) {
-                        mRewardedVideoAd.show();
+                        mInterstitialAd.show();
                         task9.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -710,9 +707,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }if (v.getId() == R.id.task11){
 
             if (myCount == 10){
-                if (mRewardedVideoAd.isLoaded()) {
+                if (mInterstitialAd.isLoaded()) {
                     if (timeLeft <9999) {
-                        mRewardedVideoAd.show();
+                        mInterstitialAd.show();
 
                     }
 
@@ -812,7 +809,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void loadRewardedVideoAd() {
+/*    private void loadRewardedVideoAd() {
 
         mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
                 new AdRequest.Builder().build());
@@ -876,7 +873,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onRewardedVideoAdFailedToLoad(int i) {
 
-    }
+    }*/
 
 
     private void starStop2() {
@@ -946,6 +943,8 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
+
+
 
 
     private void re_Loaded(){

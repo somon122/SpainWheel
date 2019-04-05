@@ -1,4 +1,4 @@
-package com.example.user.cashearingapp;
+package com.example.user.cashearingapp.PushNotification;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;

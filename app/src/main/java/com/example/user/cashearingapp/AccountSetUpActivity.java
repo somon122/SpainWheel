@@ -57,7 +57,6 @@ public class AccountSetUpActivity extends AppCompatActivity {
 
     SharedPreferences myScore;
     int confirmScore=0;
-
     String phoneNumber;
     AccountInfo accountInfo;
     String name;
@@ -93,14 +92,11 @@ public class AccountSetUpActivity extends AppCompatActivity {
         uID = user.getUid();
         phoneNumber = user.getPhoneNumber();
         progressDialog = new ProgressDialog(this);
-
-
+        progressDialog.show();
 
         myScore = this.getSharedPreferences("ConfirmSetUp", Context.MODE_PRIVATE);
         confirmScore = myScore.getInt("confirmScore",0);
 
-
-        //Toast.makeText(this, ""+confirmScore, Toast.LENGTH_SHORT).show();
 
         mDateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
@@ -131,7 +127,7 @@ public class AccountSetUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 isPermission();
-                Toast.makeText(AccountSetUpActivity.this, "Hello", Toast.LENGTH_SHORT).show();
+
             }
         });
 
@@ -189,14 +185,16 @@ public class AccountSetUpActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        if (confirmScore == 10){
+        if (confirmScore==1){
+            progressDialog.dismiss();
             Intent intent = new Intent(AccountSetUpActivity.this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
 
         }else {
-            Toast.makeText(this, "Please Enter Your Details...", Toast.LENGTH_LONG).show();
+            progressDialog.dismiss();
+
         }
     }
 
@@ -238,41 +236,49 @@ public class AccountSetUpActivity extends AppCompatActivity {
             }else {
                 progressDialog.setMessage("Information is Uploading...");
                 progressDialog.show();
+                if (accountImageUri != null){
 
-                StorageReference riversRef = mStorageRef.child(accountImageUri.getLastPathSegment()).child(uID + ".jpg");
-                riversRef.putFile(accountImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful()){
-                            String imageUrl = task.getResult().getDownloadUrl().toString();
+                    StorageReference riversRef = mStorageRef.child(accountImageUri.getLastPathSegment()).child(uID + ".jpg");
+                    riversRef.putFile(accountImageUri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful()){
+                                String imageUrl = task.getResult().getDownloadUrl().toString();
 
-                            accountInfo = new AccountInfo(uID,name,confirmPass,birthDay,imageUrl);
+                                accountInfo = new AccountInfo(uID,name,confirmPass,birthDay,imageUrl);
 
-                            myRef.child(phoneNumber).child(uID).child("AccountInfo").setValue(accountInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()){
+                                myRef.child("Users").child(phoneNumber).child(uID).child("AccountInfo").setValue(accountInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()){
 
-                                        progressDialog.dismiss();
-                                        confirmScore++;
-                                        confirmDetails();
-                                        Toast.makeText(AccountSetUpActivity.this, "Account Setup is Successfully Completed", Toast.LENGTH_SHORT).show();
-                                        Intent intent = new Intent(AccountSetUpActivity.this, MainActivity.class);
-                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        startActivity(intent);
-                                        finish();
-                                    }else {
-                                        progressDialog.dismiss();
-                                        Toast.makeText(AccountSetUpActivity.this, "Please check your Net connection", Toast.LENGTH_LONG).show();
+                                            progressDialog.dismiss();
+                                            confirmScore++;
+                                            confirmDetails();
+                                            Toast.makeText(AccountSetUpActivity.this, "Account Setup is Successfully Completed", Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(AccountSetUpActivity.this, MainActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            startActivity(intent);
+                                            finish();
+                                        }else {
+                                            progressDialog.dismiss();
+                                            Toast.makeText(AccountSetUpActivity.this, "Please check your Net connection", Toast.LENGTH_LONG).show();
+                                        }
                                     }
-                                }
-                            });
+                                });
 
 
 
+                            }
                         }
-                    }
-                });
+                    });
+
+
+
+                }else {
+                    progressDialog.dismiss();
+                    Toast.makeText(this, "Sorry missing your Photo....", Toast.LENGTH_SHORT).show();
+                }
 
 
 

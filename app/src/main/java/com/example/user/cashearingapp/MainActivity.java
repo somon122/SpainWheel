@@ -8,8 +8,11 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.os.ConfigurationCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -30,6 +33,8 @@ import com.example.user.cashearingapp.PhoneAuth.PhoneAuthActivity;
 import com.example.user.cashearingapp.PhoneAuth.PhoneAuthConfirmActivity;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,8 +42,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+
+import static java.security.AccessController.getContext;
 
 
 public class MainActivity extends AppCompatActivity
@@ -59,6 +73,8 @@ public class MainActivity extends AppCompatActivity
 
     FirebaseDatabase database;
     DatabaseReference myRef;
+    FirebaseFirestore mFirestone;
+
 
     FirebaseAuth auth;
     FirebaseUser user;
@@ -71,9 +87,12 @@ public class MainActivity extends AppCompatActivity
     boolean timeRunning;
     String timeText;
     String phoneNo;
-
-
     FloatingActionMenu floatingActionMenu;
+
+    RecyclerView recyclerMyWOrkView;
+    private List<MyWorkClass> myWorkList;
+    private MyWorkAdapter adapter;
+
 
 
     @Override
@@ -83,9 +102,13 @@ public class MainActivity extends AppCompatActivity
 
 
         initilized();
+
+        mFirestone = FirebaseFirestore.getInstance();
+
         timeShowTV.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
-        phoneNo = user.getPhoneNumber();
+        recyclerMyWOrkView = findViewById(R.id.recyclerMyWOrkView_id);
+        myWorkList = new ArrayList<>();
 
 
         Bundle bundle = getIntent().getExtras();
@@ -97,6 +120,17 @@ public class MainActivity extends AppCompatActivity
         }
 
         pointLoad();
+
+        RecyclerView.LayoutManager manager = new LinearLayoutManager(MainActivity.this,LinearLayoutManager.VERTICAL,false);
+
+        recyclerMyWOrkView.setLayoutManager(manager);
+
+        adapter = new MyWorkAdapter (getApplicationContext(),myWorkList);
+
+        recyclerMyWOrkView.setAdapter(adapter);
+        recyclerMyWOrkView.setHasFixedSize(true);
+
+
 
 
 
@@ -113,7 +147,7 @@ public class MainActivity extends AppCompatActivity
 
             if (user != null) {
 
-                myRef.child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
+                myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // This method is called once with the initial value and again
@@ -123,8 +157,6 @@ public class MainActivity extends AppCompatActivity
                             progressBar.setVisibility(View.GONE);
                             String value = dataSnapshot.getValue(String.class);
                             balanceSetUp.setBalance(Integer.parseInt(value));
-                            Toast.makeText(MainActivity.this, ""+balanceSetUp.getBalance(), Toast.LENGTH_SHORT).show();
-
                         }else {
                             progressBar.setVisibility(View.GONE);
 
@@ -139,17 +171,19 @@ public class MainActivity extends AppCompatActivity
 
                     }
                 });
-                myRef.child(phoneNo).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
+                myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         // This method is called once with the initial value and again
                         // whenever data at this location is updated.
 
                         if (dataSnapshot.exists()){
+                            progressBar.setVisibility(View.GONE);
                             String value = dataSnapshot.getValue(String.class);
                             clickBalanceControl.setBalance(Integer.parseInt(value));
 
                         }else {
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(MainActivity.this, " Data is loading...", Toast.LENGTH_SHORT).show();
                         }
 
@@ -158,6 +192,37 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onCancelled(DatabaseError error) {
                         // Failed to read value
+
+                    }
+                });
+
+
+
+                //String pushId = myRef.push().getKey();
+
+                myRef.child("MyWork").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        // This method is called once with the initial value and again
+                        // whenever data at this location is updated.
+
+                        myWorkList.clear();
+                        progressBar.setVisibility(View.GONE);
+
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+
+                            MyWorkClass myWorkClass = snapshot.getValue(MyWorkClass.class);
+                            myWorkList.add(myWorkClass);
+
+                        }
+                        adapter.notifyDataSetChanged();
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        // Failed to read value
+                        progressBar.setVisibility(View.GONE);
 
                     }
                 });
@@ -187,13 +252,16 @@ public class MainActivity extends AppCompatActivity
 
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
+
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("UserBalance");
+
         balanceSetUp = new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
 
         if (user != null) {
             uID = user.getUid();
+            phoneNo = user.getPhoneNumber();
         }
         rulesButton.setOnClickListener(this);
         loveButton.setOnClickListener(this);
@@ -201,6 +269,7 @@ public class MainActivity extends AppCompatActivity
         wheelButton.setOnClickListener(this);
 
       /*  String time = timePicker.getCurrentHour() + ":" + timePicker.getCurrentMinute();
+
         //String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
         String id = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 */
@@ -223,6 +292,7 @@ public class MainActivity extends AppCompatActivity
         floatingActionMenu = findViewById(R.id.floatingMenu_id);
         progressBar = findViewById(R.id.progressBar2222_id);
         timeShowTV = findViewById(R.id.timeShoe_id);
+
 
 
 
@@ -354,11 +424,11 @@ public class MainActivity extends AppCompatActivity
             if (balanceSetUp.getBalance() >= 5){
                 balanceSetUp.Withdraw(5);
                 String updateScore = String.valueOf(balanceSetUp.getBalance());
-                myRef.child(phoneNo).child(uID).child("MainBalance").setValue(updateScore);
+                myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateScore);
 
                 clickBalanceControl.AddBalance(500);
                 String updateBalance = String.valueOf(clickBalanceControl.getBalance());
-                myRef.child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance);
+                myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance);
 
                 convertAlert();
 
@@ -438,7 +508,9 @@ public class MainActivity extends AppCompatActivity
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-        builder.setMessage("Congratulation..! \n You got Tk500")
+        builder.setTitle("Convert Point")
+                .setIcon(R.drawable.full_love)
+                .setMessage("Congratulation..! \n You got Tk500")
                 .setCancelable(false)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override

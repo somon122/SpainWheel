@@ -2,30 +2,60 @@ package com.example.user.cashearingapp;
 
 public class WithdrawSubmit {
 
-    private String addressNumber;
-    private int amount;
+   private String withDrawDate;
+   private String userNumber;
+   private String paymentMethod;
+   private String requestNumber;
+   private String Amount;
 
-    public WithdrawSubmit(String addressNumber, int amount) {
-        this.addressNumber = addressNumber;
-        this.amount = amount;
+    public WithdrawSubmit(String withDrawDate, String userNumber, String paymentMethod, String requestNumber, String amount) {
+        this.withDrawDate = withDrawDate;
+        this.userNumber = userNumber;
+        this.paymentMethod = paymentMethod;
+        this.requestNumber = requestNumber;
+        Amount = amount;
     }
 
     public WithdrawSubmit() {
     }
 
-    public String getAddressNumber() {
-        return addressNumber;
+    public String getWithDrawDate() {
+        return withDrawDate;
     }
 
-    public void setAddressNumber(String addressNumber) {
-        this.addressNumber = addressNumber;
+    public void setWithDrawDate(String withDrawDate) {
+        this.withDrawDate = withDrawDate;
     }
 
-    public int getAmount() {
-        return amount;
+    public String getUserNumber() {
+        return userNumber;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setUserNumber(String userNumber) {
+        this.userNumber = userNumber;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getRequestNumber() {
+        return requestNumber;
+    }
+
+    public void setRequestNumber(String requestNumber) {
+        this.requestNumber = requestNumber;
+    }
+
+    public String getAmount() {
+        return Amount;
+    }
+
+    public void setAmount(String amount) {
+        Amount = amount;
     }
 }
