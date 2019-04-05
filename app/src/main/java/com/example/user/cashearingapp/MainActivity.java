@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.os.ConfigurationCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity
 
 
     private TextView deviceId,timeShowTV;
+    ConstraintLayout waitingLayout;
     TimePicker timePicker;
     ProgressBar progressBar;
     int backSpaceCount = 0;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity
 
     DrawerLayout drawer;
     NavigationView navigationView;
+    Toolbar toolbar;
 
     FirebaseDatabase database;
     DatabaseReference myRef;
@@ -237,11 +240,12 @@ public class MainActivity extends AppCompatActivity
 
     private void initilized(){
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         deviceId = findViewById(R.id.deviceId);
         timePicker = new TimePicker(this);
+        waitingLayout = findViewById(R.id.waiting_id);
 
 
 
@@ -258,6 +262,7 @@ public class MainActivity extends AppCompatActivity
 
         balanceSetUp = new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
+        waitingLayout.setVisibility(View.GONE);
 
         if (user != null) {
             uID = user.getUid();
@@ -576,8 +581,9 @@ public class MainActivity extends AppCompatActivity
 
                 timeShowTV.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
-                //drawer.setVisibility(View.VISIBLE);
+                waitingLayout.setVisibility(View.GONE);
                 floatingActionMenu.setVisibility(View.VISIBLE);
+                toolbar.setVisibility(View.VISIBLE);
 
                 Toast.makeText(MainActivity.this, "Ready For work", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(MainActivity.this,MainActivity.class));
@@ -594,8 +600,10 @@ public class MainActivity extends AppCompatActivity
 
         timeShowTV.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.VISIBLE);
-        //drawer.setVisibility(View.GONE);
+        waitingLayout.setVisibility(View.VISIBLE);
         floatingActionMenu.setVisibility(View.GONE);
+        toolbar.setVisibility(View.GONE);
+
 
         int minutes = (int) (timeLeft /60000);
         int seconds = (int) (timeLeft % 60000 /1000);

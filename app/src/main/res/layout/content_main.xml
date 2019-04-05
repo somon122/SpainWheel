@@ -102,10 +102,11 @@
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/waiting_id"
-        android:layout_width="200dp"
+        android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
+        android:background="#ffff"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -138,8 +139,9 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="40dp"
             android:textStyle="bold"
+            android:textColor="#030303"
             android:padding="10dp"
-            android:textSize="30sp"
+            android:textSize="40sp"
             android:text="00:00"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

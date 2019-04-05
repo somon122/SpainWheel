@@ -69,12 +69,14 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
     int mainBalance = 0 ;
     int counter = 0;
-    int showCount = 0;
+    int videoCount = 0;
+    int videoCounter = 0;
 
 
     int warningCount;
     int warningScore;
     SharedPreferences myScore3;
+    SharedPreferences videoControl;
 
 
 
@@ -167,11 +169,16 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         });
 
 
+
+        videoControl = this.getSharedPreferences("VideoControl", Context.MODE_PRIVATE);
+        videoCounter = videoControl.getInt("videoScore",0);
+
+
         myScore3 = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
-        warningCount = myScore3.getInt("warningScore",0);
+        warningScore = myScore3.getInt("warningScore",0);
 
 
-
+        Toast.makeText(this, ""+videoCounter, Toast.LENGTH_SHORT).show();
 
 
 
@@ -208,9 +215,16 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                 // Code to be executed when when the interstitial ad is closed.
 
 
-                if (clickBalanceControl.getBalance() >=5)
+                if (clickBalanceControl.getBalance() >=40)
 
                 {
+                    videoCounter = videoCounter-5;
+
+                    videoControl = getSharedPreferences("VideoControl", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = videoControl.edit();
+                    editor.putInt("videoScore",videoCounter);
+                    editor.commit();
+
                     Intent intent = new Intent(WheelActivity.this,Click_Activity.class);
                     intent.putExtra("click","wheel");
                     startActivity(intent);
@@ -225,7 +239,34 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()){
-                                Toast.makeText(WheelActivity.this, "point is added", Toast.LENGTH_SHORT).show();
+
+                                counter++;
+                                //showCount++;
+                                clickBalanceControl.AddBalance(counter);
+                                String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
+                                myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()){
+                                            Toast.makeText(WheelActivity.this, "Well Done..", Toast.LENGTH_SHORT).show();
+                                        }else {
+                                            Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                                        }
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                                    }
+                                });
+
+                                tapButton.setVisibility(View.GONE);
+                                //resultView.setText(courrentNumber(360 - (degree%360)));
+                                gameOver(mainBalance);
+
+
                             }else {
                                 Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
 
@@ -240,31 +281,6 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                     });
 
 
-                    counter++;
-                    //showCount++;
-                    clickBalanceControl.AddBalance(counter);
-                    String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()){
-                                Toast.makeText(WheelActivity.this, "Well Done..", Toast.LENGTH_SHORT).show();
-                            }else {
-                                Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
-
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
-
-                        }
-                    });
-
-                    tapButton.setVisibility(View.GONE);
-                    //resultView.setText(courrentNumber(360 - (degree%360)));
-                    gameOver(mainBalance);
 
 
                 }
@@ -380,8 +396,15 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
             } if (degrees >= (FACTOR *9) && degrees < (FACTOR * 11)){
 
-            mainBalance = mainBalance+6;
-            mRewardedVideoAd.show();
+                  if (videoCounter==5){
+                      mainBalance = mainBalance+6;
+                      mInterstitialAd.show();
+
+                  }else {
+                      mainBalance = mainBalance+6;
+                      mRewardedVideoAd.show();
+                  }
+
 
 
             } if (degrees >= (FACTOR *11) && degrees < (FACTOR * 13)){
@@ -392,15 +415,28 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
             } if (degrees >= (FACTOR *13) && degrees < (FACTOR * 15)){
 
-            mainBalance = mainBalance+8;
-            mRewardedVideoAd.show();
+            if (videoCounter==5){
+                mainBalance = mainBalance+8;
+                mInterstitialAd.show();
+
+            }else {
+                mainBalance = mainBalance+8;
+                mRewardedVideoAd.show();
+            }
 
 
-            } if (degrees >= (FACTOR *15) && degrees < (FACTOR * 17)){
 
+        } if (degrees >= (FACTOR *15) && degrees < (FACTOR * 17)){
 
-            mainBalance = mainBalance+9;
-            mRewardedVideoAd.show();
+            if (videoCounter==5){
+                mainBalance = mainBalance+9;
+                mInterstitialAd.show();
+
+            }else {
+                mainBalance = mainBalance+9;
+                mRewardedVideoAd.show();
+            }
+
 
             } if (degrees >= (FACTOR *17) && degrees < (FACTOR * 19)){
 
@@ -410,15 +446,30 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
             } if (degrees >= (FACTOR *19) && degrees < (FACTOR * 21)){
 
-            mainBalance = mainBalance+11;
-            mRewardedVideoAd.show();
+            if (videoCounter==5){
+                mainBalance = mainBalance+11;
+                mInterstitialAd.show();
 
-            } if (degrees >= (FACTOR *21) && degrees < (FACTOR * 23)){
-
-            mainBalance = mainBalance+12;
-            mRewardedVideoAd.show();
-
+            }else {
+                mainBalance = mainBalance+11;
+                mRewardedVideoAd.show();
             }
+
+
+        } if (degrees >= (FACTOR *21) && degrees < (FACTOR * 23)){
+
+
+            if (videoCounter==5){
+                mainBalance = mainBalance+12;
+                mInterstitialAd.show();
+
+            }else {
+                mainBalance = mainBalance+12;
+                mRewardedVideoAd.show();
+            }
+
+
+        }
 
         if ((degrees >= (FACTOR * 23 ) && degrees < 360) || (degrees >= 0 && degrees < (FACTOR * 1)))
         {
@@ -490,9 +541,16 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onRewardedVideoAdClosed() {
 
-        if (clickBalanceControl.getBalance() >=5)
+        if (clickBalanceControl.getBalance() >=40)
 
         {
+            videoCounter = videoCounter-5;
+
+            videoControl = getSharedPreferences("VideoControl", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = videoControl.edit();
+            editor.putInt("videoScore",videoCounter);
+            editor.commit();
+
             Intent intent = new Intent(WheelActivity.this,Click_Activity.class);
             intent.putExtra("click","wheel");
             startActivity(intent);
@@ -507,7 +565,37 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
-                        Toast.makeText(WheelActivity.this, "point is added", Toast.LENGTH_SHORT).show();
+                        counter++;
+                        clickBalanceControl.AddBalance(counter);
+                        String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
+                        myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()){
+
+                                    videoCounter++;
+                                    videoControl = getSharedPreferences("VideoControl", Context.MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = videoControl.edit();
+                                    editor.putInt("videoScore",videoCounter);
+                                    editor.commit();
+
+                                    tapButton.setVisibility(View.GONE);
+                                    gameOver(mainBalance);
+
+
+                                }else {
+                                    Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+
                     }else {
                         Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
 
@@ -522,29 +610,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             });
 
 
-            counter++;
-            clickBalanceControl.AddBalance(counter);
-            String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
-            myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()){
-                        Toast.makeText(WheelActivity.this, "Well Done..", Toast.LENGTH_SHORT).show();
-                    }else {
-                        Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
 
-                    }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
-
-                }
-            });
-
-            tapButton.setVisibility(View.GONE);
-            gameOver(mainBalance);
 
         }
 
@@ -570,17 +636,17 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     private void warningMethod() {
 
 
-        if (warningCount>=3){
+        if (warningScore>=3){
 
-            mainBalance = mainBalance-10;
-            balanceSetUp.Withdraw(mainBalance);
+            //mainBalance = mainBalance+10;
+            balanceSetUp.Withdraw(20);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
             myRef.child("Users").child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
 
-                        Toast.makeText(WheelActivity.this, "10 point is Minus...!\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(WheelActivity.this, "10 point is Minus...!\n\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
                     }else {
 
 
@@ -591,11 +657,14 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         }else {
 
             warningToast();
+
             warningScore++;
             myScore3 = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = myScore3.edit();
             editor.putInt("warningScore",warningScore);
             editor.commit();
+
+
 
         }
 
