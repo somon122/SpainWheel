@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -16,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +31,7 @@ import com.google.android.gms.ads.reward.RewardItem;
 import com.google.android.gms.ads.reward.RewardedVideoAd;
 import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -48,15 +52,13 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     int myCount = 0;
     int mainBalance = 0;
 
-    int clickPoint = 0;
-    int clickCount = 0;
     int warningCount = 0;
     int warningScore = 0;
+    int invalidCount = 0;
 
     private InterstitialAd mInterstitialAd;
 
     SharedPreferences myScore;
-    SharedPreferences myScore2;
     SharedPreferences myScore3;
 
     private ProgressBar progressBar;
@@ -72,7 +74,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     boolean timeRunning2;
     String timeText2;
 
-    Button rawaerdVideo;
     FirebaseDatabase database;
     DatabaseReference myRef;
 
@@ -82,7 +83,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     String phoneNo;
     BalanceSetUp balanceSetUp;
     ClickBalanceControl clickBalanceControl;
-    private RewardedVideoAd mRewardedVideoAd;
+    InvalidClickControler invalidClickControler;
+
+    ImageView reLoad;
+    ConstraintLayout constraintLayout;
 
 
 
@@ -92,35 +96,68 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_task);
 
 
-        timeTV2 = findViewById(R.id.timeTvId);
-        startBtn = findViewById(R.id.startButtonId);
+        reLoad = findViewById(R.id.reLoadImage_id);
+        constraintLayout = findViewById(R.id.reLoadPage_id);
 
-        timeTV2.setVisibility(View.GONE);
+        reLoad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),TaskActivity.class));
 
-        database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("UserBalance");
-
-
-        auth = FirebaseAuth.getInstance();
-        user = auth.getCurrentUser();
-        uID = user.getUid();
-        balanceSetUp= new BalanceSetUp();
-        clickBalanceControl=new ClickBalanceControl();
-        phoneNo = user.getPhoneNumber();
+            }
+        });
 
 
-        MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+        if (haveNetwork()){
+            constraintLayout.setVisibility(View.GONE);
+            initialized();
+            loveLoadControl();
 
-        mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
-        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+        }else {
 
-      /*  mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
-        mRewardedVideoAd.setRewardedVideoAdListener(this);*/
-        //loadRewardedVideoAd();
+            Toast.makeText(this, "Please Check Your Net Connection ..ok!", Toast.LENGTH_SHORT).show();
+        }
 
-        initialized();
+
+    }
+
+
+    //------OnCreate Ending point-------------
+
+
+
+    private boolean haveNetwork() {
+        boolean have_WiFi = false;
+        boolean have_Mobile = false;
+
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo[] networkInfo = connectivityManager.getAllNetworkInfo();
+
+        for (NetworkInfo info : networkInfo){
+
+            if (info.getTypeName().equalsIgnoreCase("WIFI"))
+            {
+                if (info.isConnected())
+                {
+                    have_WiFi = true;
+                }
+            }
+            if (info.getTypeName().equalsIgnoreCase("MOBILE"))
+
+            {
+                if (info.isConnected())
+                {
+                    have_Mobile = true;
+                }
+            }
+
+        }
+        return have_WiFi || have_Mobile;
+
+    }
+
+
+    private void loveLoadControl(){
 
 
         myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
@@ -175,6 +212,29 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
             }
         });
+
+        myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()){
+
+                    String invalidClickValue = dataSnapshot.getValue(String.class);
+                    invalidClickControler.setBalance(Integer.parseInt(invalidClickValue));
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+
+            }
+        });
+
+
+
+
         myScore = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
         myCount = myScore.getInt("score",0);
 
@@ -212,8 +272,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onAdClosed() {
-
-                // Code to be executed when when the interstitial ad is closed.
 
                 if (clickBalanceControl.getBalance()==15){
 
@@ -268,7 +326,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         });
 
 
-
     }
 
     private void mainBalanceAddPoint() {
@@ -279,19 +336,22 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance);
     }
 
+
+
     private void warningMethod() {
 
         if (warningCount>=3){
 
-            mainBalance = mainBalance-10;
-            balanceSetUp.Withdraw(mainBalance);
+            balanceSetUp.Withdraw(10);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
             myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
 
+                        invalidClickMethod();
                         Toast.makeText(TaskActivity.this, "10 point is Minus...!\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
+
                     }else {
 
 
@@ -302,6 +362,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }else {
 
             warningToast();
+            invalidClickMethod();
             warningScore++;
             myScore3 = getSharedPreferences("YourWarningScore", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = myScore3.edit();
@@ -356,6 +417,33 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initialized(){
+
+        timeTV2 = findViewById(R.id.timeTvId);
+        startBtn = findViewById(R.id.startButtonId);
+
+        timeTV2.setVisibility(View.GONE);
+
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("UserBalance");
+
+
+        auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
+        uID = user.getUid();
+        balanceSetUp= new BalanceSetUp();
+        clickBalanceControl=new ClickBalanceControl();
+        invalidClickControler = new InvalidClickControler();
+        phoneNo = user.getPhoneNumber();
+
+
+        MobileAds.initialize(this,
+                "ca-app-pub-3940256099942544~3347511713");
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+
         dialog = new ProgressDialog(this);
         task1 = findViewById(R.id.task1);
         task2 = findViewById(R.id.task2);
@@ -777,8 +865,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             public void onFinish() {
                progressBar.setVisibility(View.GONE);
                 showWork();
-                Toast.makeText(TaskActivity.this, " Next Task ready for you ", Toast.LENGTH_SHORT).show();
-            }
+                startActivity(new Intent(getApplicationContext(),WheelActivity.class));
+                finish();
+                Toast.makeText(TaskActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();            }
         }.start();
         timeRunning = true;
         //startBtn.setText("Pause");
@@ -788,6 +877,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     private void updateTimer() {
 
       progressBar.setVisibility(View.VISIBLE);
+
         int minutes = (int) (timeLeft /60000);
         int seconds = (int) (timeLeft % 60000 /1000);
         timeText = ""+minutes;
@@ -808,73 +898,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
 
     }
-
-/*    private void loadRewardedVideoAd() {
-
-        mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
-                new AdRequest.Builder().build());
-    }
-
-
-
-    @Override
-    public void onRewardedVideoAdLoaded() {
-
-
-
-    }
-
-    @Override
-    public void onRewardedVideoAdOpened() {
-
-    }
-
-    @Override
-    public void onRewardedVideoStarted() {
-
-    }
-
-    @Override
-    public void onRewardedVideoAdClosed() {
-
-        mainBalance = mainBalance+5;
-
-        balanceSetUp.AddBalance(mainBalance);
-        String updateBalance = String.valueOf(balanceSetUp.getBalance());
-        myRef.child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance);
-
-        count++;
-        myCount++;
-
-        myScore = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = myScore.edit();
-        editor.putInt("score", myCount);
-        editor.commit(); 
-        
-        clickBalanceControl.AddBalance(count);
-        String showBalance = String.valueOf(clickBalanceControl.getBalance());
-        myRef.child(phoneNo).child(uID).child("LoveBalance").setValue(showBalance);
-        re_Loaded();
-
-
-    }
-
-    @Override
-    public void onRewarded(RewardItem rewardItem) {
-
-    }
-
-    @Override
-    public void onRewardedVideoAdLeftApplication() {
-
-        warningMethod();
-    }
-
-    @Override
-    public void onRewardedVideoAdFailedToLoad(int i) {
-
-    }*/
-
 
     private void starStop2() {
         if (timeRunning2){
@@ -944,10 +967,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-
-
-
-    private void re_Loaded(){
+        private void re_Loaded(){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TaskActivity.this);
 
@@ -970,7 +990,31 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void invalidClickMethod() {
 
+        invalidCount++;
+        invalidClickControler.AddBalance(invalidCount);
+        String updateInvalidScore = String.valueOf(invalidClickControler.getBalance());
 
+        myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").setValue(updateInvalidScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if (task.isSuccessful()) {
+                    warningToast();
+                } else {
+                    Toast.makeText(TaskActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+                Toast.makeText(TaskActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
 
 }

@@ -14,6 +14,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:background="#2ca2f5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -30,7 +31,7 @@
             android:layout_marginTop="16dp"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Score : "
+            android:text="Score : 00"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.029"
             app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +46,7 @@
             android:layout_marginTop="16dp"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Score : "
+            android:text="Show : 00 "
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.97"
             app:layout_constraintStart_toStartOf="parent"
@@ -61,8 +62,8 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:padding="5dp"
-            android:text="TextView"
-            android:textColor="#1D6C44"
+            android:text="Question"
+            android:textColor="#fdfdfd"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -77,7 +78,8 @@
             android:layout_marginTop="72dp"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Button"
+            android:background="#2ca2f5"
+            android:text="Ans. No 1"
             android:textAllCaps="false"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -95,7 +97,8 @@
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:padding="5dp"
-            android:text="Button"
+            android:background="#2ca2f5"
+            android:text="Ans. No 2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/answerNo1_id" />
@@ -110,7 +113,8 @@
             android:padding="5dp"
             android:textAllCaps="false"
             android:gravity="center"
-            android:text="Button"
+            android:background="#2ca2f5"
+            android:text="Ans. No 3"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -126,7 +130,8 @@
             android:textAllCaps="false"
             android:padding="5dp"
             android:gravity="center"
-            android:text="Button"
+            android:background="#2ca2f5"
+            android:text="Ans. No 4"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/answerNo3_id" />
@@ -147,6 +152,48 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.318" />
     </android.support.constraint.ConstraintLayout>
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/questionPageReLoad_id"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#fff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/questionPageReLoadImage_id"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="192dp"
+            android:src="@drawable/reload"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="Re-Load page"
+            android:textColor="#000"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/questionPageReLoadImage_id" />
+
+
+    </android.support.constraint.ConstraintLayout>
+
+
 
 
 

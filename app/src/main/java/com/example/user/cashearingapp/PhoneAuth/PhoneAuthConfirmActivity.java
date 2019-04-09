@@ -2,6 +2,8 @@ package com.example.user.cashearingapp.PhoneAuth;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -39,9 +41,29 @@ public class PhoneAuthConfirmActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_phone_auth_confirm);
 
+        confirmButton = findViewById(R.id.confirmCode_Id);
+
+        if (haveNetwork()){
+
+            initialized();
+
+        }else {
+            confirmButton.setVisibility(View.GONE);
+            Toast.makeText(this, "Please Check Your Net Connection ..ok!", Toast.LENGTH_SHORT).show();
+
+        }
+
+
+
+
+
+    }
+
+    //-------------    end the onCreate method
+
+    private void initialized() {
 
         auth= FirebaseAuth.getInstance();
-        confirmButton = findViewById(R.id.confirmCode_Id);
         codeET = findViewById(R.id.codeEditT_id);
         progressDialog = new ProgressDialog(this);
 
@@ -77,10 +99,8 @@ public class PhoneAuthConfirmActivity extends AppCompatActivity {
             }
         });
 
-
     }
 
-    //-------------    end the onCreate method
 
 
 
@@ -163,4 +183,39 @@ public class PhoneAuthConfirmActivity extends AppCompatActivity {
 
 
     }
+
+
+    private boolean haveNetwork ()
+    {
+        boolean have_WiFi = false;
+        boolean have_Mobile = false;
+
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo[] networkInfo = connectivityManager.getAllNetworkInfo();
+
+        for (NetworkInfo info : networkInfo){
+
+            if (info.getTypeName().equalsIgnoreCase("WIFI"))
+            {
+                if (info.isConnected())
+                {
+                    have_WiFi = true;
+                }
+            }
+            if (info.getTypeName().equalsIgnoreCase("MOBILE"))
+
+            {
+                if (info.isConnected())
+                {
+                    have_Mobile = true;
+                }
+            }
+
+        }
+        return have_WiFi || have_Mobile;
+
+    }
+
+
+
 }

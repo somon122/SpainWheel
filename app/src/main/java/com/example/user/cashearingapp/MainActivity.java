@@ -25,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -96,6 +97,9 @@ public class MainActivity extends AppCompatActivity
     private List<MyWorkClass> myWorkList;
     private MyWorkAdapter adapter;
 
+    ImageView reLoad;
+    ConstraintLayout constraintLayout;
+
 
 
     @Override
@@ -103,38 +107,48 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        reLoad = findViewById(R.id.mainPageReLoadImage_id);
+        constraintLayout = findViewById(R.id.mainPageReLoad_id);
 
-        initilized();
+        reLoad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                finish();
+            }
+        });
 
-        mFirestone = FirebaseFirestore.getInstance();
-
-        timeShowTV.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
-        recyclerMyWOrkView = findViewById(R.id.recyclerMyWOrkView_id);
-        myWorkList = new ArrayList<>();
 
 
-        Bundle bundle = getIntent().getExtras();
 
-        if (bundle != null){
-           // String completedWork = bundle.getString("completed");
-            startStop();
+        if (haveNetwork()){
 
+            constraintLayout.setVisibility(View.GONE);
+            initilized();
+            mFirestone = FirebaseFirestore.getInstance();
+            timeShowTV.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
+            recyclerMyWOrkView = findViewById(R.id.recyclerMyWOrkView_id);
+            myWorkList = new ArrayList<>();
+            Bundle bundle = getIntent().getExtras();
+
+            if (bundle != null){
+                startStop();
+
+            }
+            pointLoad();
+            RecyclerView.LayoutManager manager = new LinearLayoutManager(MainActivity.this,LinearLayoutManager.VERTICAL,false);
+            recyclerMyWOrkView.setLayoutManager(manager);
+            adapter = new MyWorkAdapter (getApplicationContext(),myWorkList);
+            recyclerMyWOrkView.setAdapter(adapter);
+            recyclerMyWOrkView.setHasFixedSize(true);
+
+
+
+        }else {
+
+            Toast.makeText(this, "Please Check Your Net Connection ..ok!", Toast.LENGTH_SHORT).show();
         }
-
-        pointLoad();
-
-        RecyclerView.LayoutManager manager = new LinearLayoutManager(MainActivity.this,LinearLayoutManager.VERTICAL,false);
-
-        recyclerMyWOrkView.setLayoutManager(manager);
-
-        adapter = new MyWorkAdapter (getApplicationContext(),myWorkList);
-
-        recyclerMyWOrkView.setAdapter(adapter);
-        recyclerMyWOrkView.setHasFixedSize(true);
-
-
-
 
 
 

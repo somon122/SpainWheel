@@ -49,10 +49,12 @@ public class Click_Activity extends AppCompatActivity {
 
     ClickBalanceControl clickBalanceControl;
     BalanceSetUp balanceSetUp;
+    InvalidClickControler invalidClickControler;
     Button clickButton;
 
     int clickScore=0;
     int mainScore=0;
+    int invalidCount=0;
 
     String uID;
     String phoneNo;
@@ -75,6 +77,7 @@ public class Click_Activity extends AppCompatActivity {
         user = auth.getCurrentUser();
         clickBalanceControl = new ClickBalanceControl();
         balanceSetUp = new BalanceSetUp();
+        invalidClickControler = new InvalidClickControler();
 
         clickButton = findViewById(R.id.CompleteClick);
        progressBar = findViewById(R.id.clickProgressBar_id);
@@ -130,7 +133,6 @@ public class Click_Activity extends AppCompatActivity {
                 // Code to be executed when the user has left the app.
 
                 rulesToast();
-                //Toast.makeText(Click_Activity.this, " Please Wait 50 second....", Toast.LENGTH_SHORT).show();
                 startStop();
 
 
@@ -150,9 +152,31 @@ public class Click_Activity extends AppCompatActivity {
 
                 }else {
 
-                    sorryToast();
-                   // Toast.makeText(Click_Activity.this, " !..Your Work is not Completed. Try Again Ok ", Toast.LENGTH_SHORT).show();
-                    mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                    invalidCount++;
+                    invalidClickControler.AddBalance(invalidCount);
+                    String updateInvalidScore= String.valueOf(invalidClickControler.getBalance());
+
+                    myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").setValue(updateInvalidScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if (task.isSuccessful()) {
+                                sorryToast();
+                                mInterstitialAd.loadAd(new AdRequest.Builder().build());
+                            }else {
+                                Toast.makeText(Click_Activity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(Click_Activity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
                 }
             }
         });
@@ -332,6 +356,25 @@ public class Click_Activity extends AppCompatActivity {
                     String mainValue = dataSnapshot.getValue(String.class);
                     balanceSetUp.setBalance(Integer.parseInt(mainValue));
 
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+
+            }
+        });
+
+        myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()){
+
+                    String invalidClickValue = dataSnapshot.getValue(String.class);
+                    invalidClickControler.setBalance(Integer.parseInt(invalidClickValue));
 
                 }
             }

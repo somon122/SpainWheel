@@ -5,7 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -66,18 +70,25 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
     BalanceSetUp balanceSetUp;
     ClickBalanceControl clickBalanceControl;
+    InvalidClickControler invalidClickControler;
 
     int mainBalance = 0 ;
     int counter = 0;
-    int videoCount = 0;
     int videoCounter = 0;
+    int invalidCount = 0;
+
+    CountDownTimer countDownTimer;
+    long timeLeft = 10000;
+    boolean timeRunning;
+    String timeText;
 
 
-    int warningCount;
     int warningScore;
     SharedPreferences myScore3;
     SharedPreferences videoControl;
 
+    ImageView reLoad;
+    ConstraintLayout constraintLayout;
 
 
 
@@ -85,6 +96,73 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wheel);
+
+
+        tapButton = findViewById(R.id.tapButtonId);
+
+        reLoad = findViewById(R.id.wheelPageReLoadImage_id);
+        constraintLayout = findViewById(R.id.wheelPageReLoad_id);
+
+        reLoad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),WheelActivity.class));
+
+            }
+        });
+
+
+
+
+
+        if (haveNetwork()){
+            constraintLayout.setVisibility(View.GONE);
+            initialized();
+
+        }else {
+            tapButton.setVisibility(View.GONE);
+            Toast.makeText(this, "Please Check Your Net Connection ..ok!", Toast.LENGTH_SHORT).show();
+        }
+
+
+
+
+    }
+
+
+    private boolean haveNetwork() {
+        boolean have_WiFi = false;
+        boolean have_Mobile = false;
+
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo[] networkInfo = connectivityManager.getAllNetworkInfo();
+
+        for (NetworkInfo info : networkInfo){
+
+            if (info.getTypeName().equalsIgnoreCase("WIFI"))
+            {
+                if (info.isConnected())
+                {
+                    have_WiFi = true;
+                }
+            }
+            if (info.getTypeName().equalsIgnoreCase("MOBILE"))
+
+            {
+                if (info.isConnected())
+                {
+                    have_Mobile = true;
+                }
+            }
+
+        }
+        return have_WiFi || have_Mobile;
+
+    }
+
+
+
+    private void initialized() {
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("UserBalance");
@@ -96,8 +174,8 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
         balanceSetUp= new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
+        invalidClickControler = new InvalidClickControler();
 
-        tapButton = findViewById(R.id.tapButtonId);
         wheelImage = findViewById(R.id.wheel_id);
         resultView= findViewById(R.id.resultId);
         counterShow= findViewById(R.id.counterShow_Id);
@@ -105,9 +183,10 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
         phoneNo = user.getPhoneNumber();
 
-
         r = new Random();
-       progressBar=findViewById(R.id.wheelProgressBar_id);
+        progressBar=findViewById(R.id.wheelProgressBar_id);
+        progressBar.setVisibility(View.VISIBLE);
+        startStop();
 
 
         MobileAds.initialize(this,
@@ -132,38 +211,38 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
                 {
 
-                   degree_old = degree % 360;
-                   degree = r.nextInt(3600) + 720;
+                    degree_old = degree % 360;
+                    degree = r.nextInt(3600) + 720;
 
-                   RotateAnimation animationRotate = new RotateAnimation(degree_old,degree,RotateAnimation.RELATIVE_TO_SELF, 0.5f,RotateAnimation.RELATIVE_TO_SELF, 0.5f);
-                   animationRotate.setDuration(3600);
-                   animationRotate.setFillAfter(true);
-                   animationRotate.setInterpolator(new DecelerateInterpolator());
-                   animationRotate.setAnimationListener(new Animation.AnimationListener() {
-                       @Override
-                       public void onAnimationStart(Animation animation) {
+                    RotateAnimation animationRotate = new RotateAnimation(degree_old,degree,RotateAnimation.RELATIVE_TO_SELF, 0.5f,RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+                    animationRotate.setDuration(3600);
+                    animationRotate.setFillAfter(true);
+                    animationRotate.setInterpolator(new DecelerateInterpolator());
+                    animationRotate.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
 
-                           tapButton.setVisibility(View.GONE);
+                            tapButton.setVisibility(View.GONE);
 
-                       }
+                        }
 
-                       @Override
-                       public void onAnimationEnd(Animation animation) {
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
 
-                           courrentNumber(360 - (degree%360));
+                            courrentNumber(360 - (degree%360));
 
-                       }
+                        }
 
-                       @Override
-                       public void onAnimationRepeat(Animation animation) {
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
 
-                       }
-                   });
+                        }
+                    });
 
-                   wheelImage.startAnimation(animationRotate);
+                    wheelImage.startAnimation(animationRotate);
 
 
-               }
+                }
 
             }
         });
@@ -177,8 +256,6 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         myScore3 = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
         warningScore = myScore3.getInt("warningScore",0);
 
-
-        Toast.makeText(this, ""+videoCounter, Toast.LENGTH_SHORT).show();
 
 
 
@@ -206,7 +283,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             public void onAdLeftApplication() {
                 // Code to be executed when the user has left the app.
 
-               warningMethod();
+                warningMethod();
             }
 
             @Override
@@ -241,14 +318,16 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                             if (task.isSuccessful()){
 
                                 counter++;
-                                //showCount++;
                                 clickBalanceControl.AddBalance(counter);
                                 String updateClickBalance = String.valueOf(clickBalanceControl.getBalance());
                                 myRef.child("Users").child(phoneNo).child(uId).child("ClickBalance").setValue(updateClickBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()){
-                                            Toast.makeText(WheelActivity.this, "Well Done..", Toast.LENGTH_SHORT).show();
+
+                                            tapButton.setVisibility(View.GONE);
+                                            gameOver(mainBalance);
+
                                         }else {
                                             Toast.makeText(WheelActivity.this, "try Again", Toast.LENGTH_SHORT).show();
 
@@ -262,9 +341,6 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                                     }
                                 });
 
-                                tapButton.setVisibility(View.GONE);
-                                //resultView.setText(courrentNumber(360 - (degree%360)));
-                                gameOver(mainBalance);
 
 
                             }else {
@@ -289,7 +365,9 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         });
 
 
+
     }
+
 
     private void BalanceControl() {
 
@@ -305,9 +383,8 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                     balanceSetUp.setBalance(Integer.parseInt(value));
                     resultView.setText("Score : "+balanceSetUp.getBalance());
 
-                }/*else {
-                    Toast.makeText(WheelActivity.this, " Data is Empty", Toast.LENGTH_SHORT).show();
-                }*/
+                }else {
+                }
 
 
 
@@ -332,10 +409,9 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                     clickBalanceControl.setBalance(Integer.parseInt(value));
                     counterShow.setText("Show: "+clickBalanceControl.getBalance());
 
-                }/*else {
-                    Toast.makeText(WheelActivity.this, " Data is Empty", Toast.LENGTH_SHORT).show();
-                }*/
+                }else {
 
+                }
 
 
             }
@@ -343,6 +419,25 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onCancelled(DatabaseError error) {
                 // Failed to read value
+
+            }
+        });
+
+        myRef.child("Users").child(phoneNo).child(uId).child("InvalidClick").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()){
+
+                    String invalidClickValue = dataSnapshot.getValue(String.class);
+                    invalidClickControler.setBalance(Integer.parseInt(invalidClickValue));
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+
 
             }
         });
@@ -360,13 +455,23 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
     private void adIsLoaded() {
 
-        if (mInterstitialAd.isLoaded()&& mRewardedVideoAd.isLoaded()){
+        if (mInterstitialAd.isLoaded()){
 
-            tapButton.setVisibility(View.VISIBLE);
-           progressBar.setVisibility(View.GONE);
         }else {
             progressBar.setVisibility(View.GONE);
-            Toast.makeText(this, "Please Check your Net Connections", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Net Connection is Slow", Toast.LENGTH_SHORT).show();
+
+        }
+
+    }
+
+    private void videoAdIsLoaded() {
+
+        if (mRewardedVideoAd.isLoaded()){
+
+        }else {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Net Connection is Slow", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -415,27 +520,39 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
             } if (degrees >= (FACTOR *13) && degrees < (FACTOR * 15)){
 
-            if (videoCounter==5){
-                mainBalance = mainBalance+8;
-                mInterstitialAd.show();
+            if (mRewardedVideoAd.isLoaded()){
+                if (videoCounter==5){
+                    mainBalance = mainBalance+8;
+                    mInterstitialAd.show();
 
+                }else {
+                    mainBalance = mainBalance+8;
+                    mRewardedVideoAd.show();
+                }
             }else {
                 mainBalance = mainBalance+8;
-                mRewardedVideoAd.show();
+                mInterstitialAd.show();
             }
+
 
 
 
         } if (degrees >= (FACTOR *15) && degrees < (FACTOR * 17)){
 
-            if (videoCounter==5){
-                mainBalance = mainBalance+9;
-                mInterstitialAd.show();
+                  if (mRewardedVideoAd.isLoaded()){
+                      if (videoCounter==5){
+                          mainBalance = mainBalance+9;
+                          mInterstitialAd.show();
 
-            }else {
-                mainBalance = mainBalance+9;
-                mRewardedVideoAd.show();
-            }
+                      }else {
+                          mainBalance = mainBalance+9;
+                          mRewardedVideoAd.show();
+                      }
+                  }else {
+                      mainBalance = mainBalance+9;
+                      mInterstitialAd.show();
+                  }
+
 
 
             } if (degrees >= (FACTOR *17) && degrees < (FACTOR * 19)){
@@ -446,26 +563,37 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
             } if (degrees >= (FACTOR *19) && degrees < (FACTOR * 21)){
 
-            if (videoCounter==5){
-                mainBalance = mainBalance+11;
-                mInterstitialAd.show();
+            if (mRewardedVideoAd.isLoaded()){
+                if (videoCounter==5){
+                    mainBalance = mainBalance+11;
+                    mInterstitialAd.show();
 
+                }else {
+                    mainBalance = mainBalance+11;
+                    mRewardedVideoAd.show();
+                }
             }else {
                 mainBalance = mainBalance+11;
-                mRewardedVideoAd.show();
+                mInterstitialAd.show();
             }
+
 
 
         } if (degrees >= (FACTOR *21) && degrees < (FACTOR * 23)){
 
 
-            if (videoCounter==5){
-                mainBalance = mainBalance+12;
-                mInterstitialAd.show();
+            if (mRewardedVideoAd.isLoaded()){
+                if (videoCounter==5){
+                    mainBalance = mainBalance+12;
+                    mInterstitialAd.show();
 
+                }else {
+                    mainBalance = mainBalance+12;
+                    mRewardedVideoAd.show();
+                }
             }else {
                 mainBalance = mainBalance+12;
-                mRewardedVideoAd.show();
+                mInterstitialAd.show();
             }
 
 
@@ -524,7 +652,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onRewardedVideoAdLoaded() {
 
-        adIsLoaded();
+        videoAdIsLoaded();
 
     }
 
@@ -638,7 +766,6 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
         if (warningScore>=3){
 
-            //mainBalance = mainBalance+10;
             balanceSetUp.Withdraw(20);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
             myRef.child("Users").child(phoneNo).child(uId).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -646,7 +773,9 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
 
-                        Toast.makeText(WheelActivity.this, "10 point is Minus...!\n\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
+                        invalidClickMethod();
+                        Toast.makeText(WheelActivity.this, "20 point is Minus...!\n\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
+
                     }else {
 
 
@@ -656,8 +785,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
         }else {
 
-            warningToast();
-
+            invalidClickMethod();
             warningScore++;
             myScore3 = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = myScore3.edit();
@@ -681,6 +809,93 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         toast.setGravity(Gravity.CENTER,0,0);
         toast.setView(toastView);
         toast.show();
+
+
+    }
+
+    private void invalidClickMethod(){
+
+        invalidCount++;
+        invalidClickControler.AddBalance(invalidCount);
+        String updateInvalidScore= String.valueOf(invalidClickControler.getBalance());
+
+        myRef.child("Users").child(phoneNo).child(uId).child("InvalidClick").setValue(updateInvalidScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if (task.isSuccessful()) {
+                   warningToast();
+                }else {
+                    Toast.makeText(WheelActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+                Toast.makeText(WheelActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
+
+    }
+
+
+    private void startStop() {
+        if (timeRunning){
+            stopTime();
+        }else {
+            startTime();
+        }
+
+    }
+
+
+    private void startTime() {
+        countDownTimer = new CountDownTimer(timeLeft,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeLeft =millisUntilFinished;
+                updateTimer();
+
+            }
+
+            @Override
+            public void onFinish() {
+
+                tapButton.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+
+                startActivity(new Intent(getApplicationContext(),WheelActivity.class));
+                finish();
+                Toast.makeText(WheelActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();
+            }
+        }.start();
+        timeRunning = true;
+        //startBtn.setText("Pause");
+
+    }
+
+    private void updateTimer() {
+
+        int minutes = (int) (timeLeft /60000);
+        int seconds = (int) (timeLeft % 60000 /1000);
+        timeText = ""+minutes;
+        timeText += ":";
+        if (seconds <10)timeText += "0";
+        timeText +=seconds;
+        // timeTV.setText(timeText);
+
+
+    }
+
+    private void stopTime() {
+        countDownTimer.cancel();
+        timeRunning = false;
+        // startBtn.setText("Start");
+
 
 
     }

@@ -5,7 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +28,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -42,8 +48,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
     private Questions questions = new Questions();
      private String mAnswer;
-     private int mScore = 0;
-     private int showScore = 0;
+     private int invalidCount = 0;
      private int mQuestionsLenght = questions.mQuestions.length ;
      Random r;
     private InterstitialAd mInterstitialAd;
@@ -58,6 +63,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
     BalanceSetUp balanceSetUp;
     ClickBalanceControl clickBalanceControl;
+    InvalidClickControler invalidClickControler;
 
     int mainBalance = 0 ;
     String uID;
@@ -67,18 +73,84 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
     int warningCount = 0;
     int warningScore = 0;
 
+    CountDownTimer countDownTimer;
+    long timeLeft = 10000;
+    boolean timeRunning;
+    String timeText;
+
+    ImageView reLoad;
+    ConstraintLayout constraintLayout;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_question_work);
 
+        reLoad = findViewById(R.id.questionPageReLoadImage_id);
+        constraintLayout = findViewById(R.id.questionPageReLoad_id);
 
-        initialized();
+        reLoad.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),QuestionWorkActivity.class));
 
-        progressBar.setVisibility(View.VISIBLE);
+            }
+        });
 
-        phoneNo = user.getPhoneNumber();
+
+        if (haveNetwork()){
+
+            constraintLayout.setVisibility(View.GONE);
+            initialized();
+            progressBar.setVisibility(View.VISIBLE);
+            phoneNo = user.getPhoneNumber();
+            questionLoadMethod();
+
+        }else {
+            Toast.makeText(this, "Please Check Your Net Connection ..ok!", Toast.LENGTH_SHORT).show();
+        }
+
+
+
+    }
+
+
+    private boolean haveNetwork() {
+        boolean have_WiFi = false;
+        boolean have_Mobile = false;
+
+        ConnectivityManager connectivityManager = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+        NetworkInfo[] networkInfo = connectivityManager.getAllNetworkInfo();
+
+        for (NetworkInfo info : networkInfo){
+
+            if (info.getTypeName().equalsIgnoreCase("WIFI"))
+            {
+                if (info.isConnected())
+                {
+                    have_WiFi = true;
+                }
+            }
+            if (info.getTypeName().equalsIgnoreCase("MOBILE"))
+
+            {
+                if (info.isConnected())
+                {
+                    have_Mobile = true;
+                }
+            }
+
+        }
+        return have_WiFi || have_Mobile;
+
+    }
+
+
+
+    private void questionLoadMethod(){
 
 
         myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").addValueEventListener(new ValueEventListener() {
@@ -91,7 +163,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
                     progressBar.setVisibility(View.GONE);
                     String value = dataSnapshot.getValue(String.class);
                     balanceSetUp.setBalance(Integer.parseInt(value));
-                    scoreTV.setText("MainBalance : "+balanceSetUp.getBalance());
+                    scoreTV.setText("Score : "+balanceSetUp.getBalance());
 
                 }/*else {
                     Toast.makeText(QuestionWorkActivity.this, " Data is empty", Toast.LENGTH_SHORT).show();
@@ -134,6 +206,29 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
+
+        myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()){
+
+                    String invalidClickValue = dataSnapshot.getValue(String.class);
+                    invalidClickControler.setBalance(Integer.parseInt(invalidClickValue));
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+
+            }
+        });
+
+
+
+
         myScore3 = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
         warningCount = myScore3.getInt("warningScore",0);
 
@@ -173,7 +268,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
                 // Code to be executed when when the interstitial ad is closed.
                 //mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-                if (clickBalanceControl.getBalance() >=5){
+                if (clickBalanceControl.getBalance() >=40){
 
                     questionTV.setVisibility(View.GONE);
                     answerButtonNo1.setVisibility(View.GONE);
@@ -187,24 +282,56 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
                     mainBalance++;
                     balanceSetUp.AddBalance(mainBalance);
                     String updateScore = String.valueOf(balanceSetUp.getBalance());
-                    myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateScore);
+                    myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                          if (task.isSuccessful()){
 
-                    showScore++;
-                    clickBalanceControl.AddBalance(mainBalance);
-                    String updateShowScore = String.valueOf(clickBalanceControl.getBalance());
-                    myRef.child("Users").child(phoneNo).child(uID).child("QuestionBalance").setValue(updateShowScore);
+                              clickBalanceControl.AddBalance(mainBalance);
+                              String updateShowScore = String.valueOf(clickBalanceControl.getBalance());
+                              myRef.child("Users").child(phoneNo).child(uID).child("QuestionBalance").setValue(updateShowScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                  @Override
+                                  public void onComplete(@NonNull Task<Void> task) {
+                                      if (task.isSuccessful()){
 
-                    //score.setText("Score: "+mScore);
-                    updateQuestion(r.nextInt(mQuestionsLenght));
-                    answerButtonNo1.setEnabled(false);
-                    answerButtonNo2.setEnabled(false);
-                    answerButtonNo3.setEnabled(false);
-                    answerButtonNo4.setEnabled(false);
-                    gameLoaded();
+                                          updateQuestion(r.nextInt(mQuestionsLenght));
+                                          answerButtonNo1.setEnabled(false);
+                                          answerButtonNo2.setEnabled(false);
+                                          answerButtonNo3.setEnabled(false);
+                                          answerButtonNo4.setEnabled(false);
+                                          gameLoaded();
+                                      }else {
+                                          Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+
+                                      }
+
+                                  }
+                              }).addOnFailureListener(new OnFailureListener() {
+                                  @Override
+                                  public void onFailure(@NonNull Exception e) {
+                                      Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+
+                                  }
+                              });
+
+                          } else {
+
+                              Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+                          }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
                 }
 
             }
         });
+
 
     }
 
@@ -213,14 +340,13 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
         if (warningCount>=3){
 
-            mainBalance = mainBalance-10;
-            balanceSetUp.Withdraw(mainBalance);
+            balanceSetUp.Withdraw(10);
             String updateBalance = String.valueOf(balanceSetUp.getBalance());
             myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()){
-
+                        invalidClickMethod();
                         Toast.makeText(QuestionWorkActivity.this, "10 point is Minus...!\n Don't Mistake Again ok.", Toast.LENGTH_SHORT).show();
                     }else {
 
@@ -232,6 +358,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
         }else {
 
             warningToast();
+            invalidClickMethod();
             warningScore++;
             myScore3 = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = myScore3.edit();
@@ -253,12 +380,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
     private void adIsLoaded() {
 
         if (mInterstitialAd.isLoaded()){
-            answerButtonNo1.setEnabled(true);
-            answerButtonNo2.setEnabled(true);
-            answerButtonNo3.setEnabled(true);
-            answerButtonNo4.setEnabled(true);
-           progressBar.setVisibility(View.GONE);
-            Toast.makeText(this, "Ad is loaded successfully", Toast.LENGTH_SHORT).show();
+
         }else {
             progressBar.setVisibility(View.GONE);
             Toast.makeText(this, "Please Check your Net Connections", Toast.LENGTH_SHORT).show();
@@ -276,6 +398,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
         uID = user.getUid();
         balanceSetUp= new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
+        invalidClickControler =new InvalidClickControler();
 
 
         MobileAds.initialize(this,
@@ -299,14 +422,13 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
         answerButtonNo2.setOnClickListener(this);
         answerButtonNo3.setOnClickListener(this);
         answerButtonNo4.setOnClickListener(this);
-
-       // score.setText("Score: "+mScore);
         updateQuestion(r.nextInt(mQuestionsLenght));
 
         answerButtonNo1.setEnabled(false);
         answerButtonNo2.setEnabled(false);
         answerButtonNo3.setEnabled(false);
         answerButtonNo4.setEnabled(false);
+        startStop();
 
 
     }
@@ -341,29 +463,6 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
             }
 
-          /*  if (mScore >11){
-
-                questionTV.setVisibility(View.GONE);
-                answerButtonNo1.setVisibility(View.GONE);
-                answerButtonNo2.setVisibility(View.GONE);
-                answerButtonNo3.setVisibility(View.GONE);
-                answerButtonNo4.setVisibility(View.GONE);
-                gameOver();
-            }else {
-
-                if (answerButtonNo2.getText()==mAnswer){
-                    mScore++;
-                    score.setText("Score: "+mScore);
-                    updateQuestion(r.nextInt(mQuestionsLenght));
-                }else {
-
-                    //gameOver();
-                    Toast.makeText(this, "Wrong Answer", Toast.LENGTH_SHORT).show();
-
-
-                }
-
-            }*/
 
         }if (v.getId()==R.id.answerNo3_id) {
 
@@ -469,7 +568,92 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
 
     }
+    private void invalidClickMethod() {
 
+        invalidCount++;
+        invalidClickControler.AddBalance(invalidCount);
+        String updateInvalidScore = String.valueOf(invalidClickControler.getBalance());
+
+        myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").setValue(updateInvalidScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+
+                if (task.isSuccessful()) {
+                    warningToast();
+                } else {
+                    Toast.makeText(QuestionWorkActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+                Toast.makeText(QuestionWorkActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+
+            }
+        });
+    }
+
+
+    private void startStop() {
+        if (timeRunning){
+            stopTime();
+        }else {
+            startTime();
+        }
+
+    }
+
+
+    private void startTime() {
+        countDownTimer = new CountDownTimer(timeLeft,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeLeft =millisUntilFinished;
+                updateTimer();
+
+            }
+
+            @Override
+            public void onFinish() {
+                answerButtonNo1.setEnabled(true);
+                answerButtonNo2.setEnabled(true);
+                answerButtonNo3.setEnabled(true);
+                answerButtonNo4.setEnabled(true);
+                progressBar.setVisibility(View.GONE);
+                startActivity(new Intent(getApplicationContext(),WheelActivity.class));
+                finish();
+                Toast.makeText(QuestionWorkActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();            }
+        }.start();
+        timeRunning = true;
+        //startBtn.setText("Pause");
+
+    }
+
+    private void updateTimer() {
+
+        progressBar.setVisibility(View.VISIBLE);
+
+        int minutes = (int) (timeLeft /60000);
+        int seconds = (int) (timeLeft % 60000 /1000);
+        timeText = ""+minutes;
+        timeText += ":";
+        if (seconds <10)timeText += "0";
+        timeText +=seconds;
+        // timeTV.setText(timeText);
+
+
+    }
+
+    private void stopTime() {
+        countDownTimer.cancel();
+        timeRunning = false;
+        // startBtn.setText("Start");
+
+
+
+    }
 
 
 }

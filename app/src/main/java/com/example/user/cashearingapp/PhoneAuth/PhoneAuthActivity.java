@@ -84,7 +84,6 @@ public class PhoneAuthActivity extends AppCompatActivity {
             intent.putExtra("phoneNumber",number);
             startActivity(intent);
 
-            Toast.makeText(PhoneAuthActivity.this, " Welcome New User", Toast.LENGTH_SHORT).show();
 
 
         }
