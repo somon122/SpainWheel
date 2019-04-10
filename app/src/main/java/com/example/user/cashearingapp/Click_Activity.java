@@ -58,6 +58,7 @@ public class Click_Activity extends AppCompatActivity {
 
     String uID;
     String phoneNo;
+    String updateInvalidScore;
 
 
 
@@ -154,14 +155,37 @@ public class Click_Activity extends AppCompatActivity {
 
                     invalidCount++;
                     invalidClickControler.AddBalance(invalidCount);
-                    String updateInvalidScore= String.valueOf(invalidClickControler.getBalance());
+                    updateInvalidScore = String.valueOf(invalidClickControler.getBalance());
 
                     myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").setValue(updateInvalidScore).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
 
                             if (task.isSuccessful()) {
-                                sorryToast();
+
+                                String pushId = myRef.push().getKey();
+                                InvalidClickClass invalidClickClass = new InvalidClickClass(phoneNo,updateInvalidScore);
+                                myRef.child("InvalidClick").child(pushId).setValue(invalidClickClass).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+
+                                        if (task.isSuccessful()) {
+                                            sorryToast();
+
+                                        }else {
+                                            Toast.makeText(Click_Activity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                        Toast.makeText(Click_Activity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+
+                                    }
+                                });
+
                                 mInterstitialAd.loadAd(new AdRequest.Builder().build());
                             }else {
                                 Toast.makeText(Click_Activity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();

@@ -90,6 +90,9 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     ImageView reLoad;
     ConstraintLayout constraintLayout;
 
+    String updateInvalidScore;
+
+
 
 
     @Override
@@ -186,7 +189,9 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         r = new Random();
         progressBar=findViewById(R.id.wheelProgressBar_id);
         progressBar.setVisibility(View.VISIBLE);
-        startStop();
+
+            startStop();
+
 
 
         MobileAds.initialize(this,
@@ -817,27 +822,41 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
         invalidCount++;
         invalidClickControler.AddBalance(invalidCount);
-        String updateInvalidScore= String.valueOf(invalidClickControler.getBalance());
+        updateInvalidScore = String.valueOf(invalidClickControler.getBalance());
+
 
         myRef.child("Users").child(phoneNo).child(uId).child("InvalidClick").setValue(updateInvalidScore).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+             if (task.isSuccessful()){
 
-                if (task.isSuccessful()) {
-                   warningToast();
-                }else {
-                    Toast.makeText(WheelActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
-                }
+                 String pushId = myRef.push().getKey();
+                 InvalidClickClass invalidClickClass = new InvalidClickClass(phoneNo,updateInvalidScore);
+                 myRef.child("InvalidClick").child(pushId).setValue(invalidClickClass).addOnCompleteListener(new OnCompleteListener<Void>() {
+                     @Override
+                     public void onComplete(@NonNull Task<Void> task) {
 
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
+                         if (task.isSuccessful()) {
+                             warningToast();
+                         }else {
+                             Toast.makeText(WheelActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                         }
 
-                Toast.makeText(WheelActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                     }
+                 }).addOnFailureListener(new OnFailureListener() {
+                     @Override
+                     public void onFailure(@NonNull Exception e) {
 
+                         Toast.makeText(WheelActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+
+                     }
+                 });
+
+
+             }
             }
         });
+
 
 
     }
@@ -867,9 +886,6 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
                 tapButton.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
-
-                startActivity(new Intent(getApplicationContext(),WheelActivity.class));
-                finish();
                 Toast.makeText(WheelActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();
             }
         }.start();

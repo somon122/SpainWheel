@@ -88,6 +88,8 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     ImageView reLoad;
     ConstraintLayout constraintLayout;
 
+    String updateInvalidScore;
+
 
 
     @Override
@@ -865,8 +867,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             public void onFinish() {
                progressBar.setVisibility(View.GONE);
                 showWork();
-                startActivity(new Intent(getApplicationContext(),WheelActivity.class));
-                finish();
                 Toast.makeText(TaskActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();            }
         }.start();
         timeRunning = true;
@@ -994,27 +994,43 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         invalidCount++;
         invalidClickControler.AddBalance(invalidCount);
-        String updateInvalidScore = String.valueOf(invalidClickControler.getBalance());
+        updateInvalidScore = String.valueOf(invalidClickControler.getBalance());
+
 
         myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").setValue(updateInvalidScore).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
 
-                if (task.isSuccessful()) {
-                    warningToast();
-                } else {
-                    Toast.makeText(TaskActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                if (task.isSuccessful()){
+
+                    String pushId = myRef.push().getKey();
+                    InvalidClickClass invalidClickClass = new InvalidClickClass(phoneNo,updateInvalidScore);
+
+                    myRef.child("InvalidClick").child(pushId).setValue(invalidClickClass).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+
+                            if (task.isSuccessful()) {
+                                warningToast();
+                            } else {
+                                Toast.makeText(TaskActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(TaskActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
+
+                        }
+                    });
+
                 }
-
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
-                Toast.makeText(TaskActivity.this, "Slow net Connection...", Toast.LENGTH_SHORT).show();
-
             }
         });
+
+
     }
 
 }
