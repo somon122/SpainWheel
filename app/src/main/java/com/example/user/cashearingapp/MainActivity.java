@@ -223,16 +223,23 @@ public class MainActivity extends AppCompatActivity
                         // This method is called once with the initial value and again
                         // whenever data at this location is updated.
 
-                        myWorkList.clear();
-                        progressBar.setVisibility(View.GONE);
+                        if (dataSnapshot.exists()){
+                            myWorkList.clear();
+                            progressBar.setVisibility(View.GONE);
 
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()){
 
-                            MyWorkClass myWorkClass = snapshot.getValue(MyWorkClass.class);
-                            myWorkList.add(myWorkClass);
+                                MyWorkClass myWorkClass = snapshot.getValue(MyWorkClass.class);
+                                myWorkList.add(myWorkClass);
+
+                            }
+                            adapter.notifyDataSetChanged();
+
+                        }else {
+                            progressBar.setVisibility(View.GONE);
 
                         }
-                        adapter.notifyDataSetChanged();
+
 
                     }
 
@@ -370,6 +377,11 @@ public class MainActivity extends AppCompatActivity
 
             return true;
         }
+        if (id == R.id.rules420_id){
+            startActivity(new Intent(MainActivity.this, RulesShowActivity.class));
+
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -415,6 +427,11 @@ public class MainActivity extends AppCompatActivity
         else if (id == R.id.share_id) {
 
             startActivity(new Intent(MainActivity.this, AccountSetUpActivity.class));
+
+
+        } else if (id == R.id.rulesShow22_id) {
+
+            startActivity(new Intent(MainActivity.this, RulesShowActivity.class));
 
 
         } else if (id == R.id.aboutMe_id) {
@@ -473,7 +490,7 @@ public class MainActivity extends AppCompatActivity
 
         if (v.getId()==R.id.rules_id){
 
-            startActivity(new Intent(MainActivity.this,VideoShowActivity.class));
+            startActivity(new Intent(MainActivity.this,RulesShowActivity.class));
 
         }
         if (v.getId()==R.id.wheelSpin_id){

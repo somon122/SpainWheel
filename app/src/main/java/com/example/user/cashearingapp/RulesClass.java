@@ -2,27 +2,17 @@ package com.example.user.cashearingapp;
 
 public class RulesClass {
 
-    String userId;
-    String question;
-    String banglaAns;
-    String EnglishAns;
+    private String question;
+    private String banglaAns;
+    private String englishAns;
 
-    public RulesClass(String userId, String question, String banglaAns, String englishAns) {
-        this.userId = userId;
+    public RulesClass(String question, String banglaAns, String englishAns) {
         this.question = question;
         this.banglaAns = banglaAns;
-        EnglishAns = englishAns;
+        this.englishAns = englishAns;
     }
 
     public RulesClass() {
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
     }
 
     public String getQuestion() {
@@ -42,10 +32,10 @@ public class RulesClass {
     }
 
     public String getEnglishAns() {
-        return EnglishAns;
+        return englishAns;
     }
 
     public void setEnglishAns(String englishAns) {
-        EnglishAns = englishAns;
+        this.englishAns = englishAns;
     }
 }
