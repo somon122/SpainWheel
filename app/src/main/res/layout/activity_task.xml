@@ -11,9 +11,9 @@
         android:id="@+id/constraintLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="116dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/counterId">
 
@@ -165,34 +165,35 @@
     </android.support.constraint.ConstraintLayout>
 
 
-
     <TextView
         android:id="@+id/finalTask"
         android:layout_width="wrap_content"
         android:layout_height="70dp"
-        android:padding="10dp"
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="8dp"
-        android:gravity="center"
-        android:background="#13a9ef"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
+        android:background="#13a9ef"
+        android:gravity="center"
+        android:padding="10dp"
         android:text="More Task"
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout3" />
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout3"
+        app:layout_constraintVertical_bias="0.861" />
 
     <TextView
         android:id="@+id/counterId"
         android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_marginEnd="16dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:gravity="center"
         android:text="0"
+        android:padding="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/mainBalance_id"
         app:layout_constraintTop_toTopOf="parent" />
@@ -206,28 +207,27 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:background="#0fefe8"
         android:layout_weight="1"
+        android:background="#0fefe8"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.415" />
+        app:layout_constraintVertical_bias="0.424" />
 
 
     <TextView
-        android:textSize="50sp"
-        android:text="@string/_10_00"
-        android:textColor="#000"
         android:id="@+id/timeTvId"
         android:layout_width="200dp"
         android:layout_height="200dp"
-        android:gravity="center"
-        android:background="#06c0f4"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="144dp"
+        android:background="#06c0f4"
+        android:gravity="center"
+        android:text="@string/_10_00"
+        android:textColor="#000"
+        android:textSize="50sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -265,9 +265,9 @@
         android:layout_height="50dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:gravity="center"
-        android:text="Balance : 0"
+        android:text="Score : 0"
         android:textSize="30sp"
         app:layout_constraintEnd_toStartOf="@+id/counterId"
         app:layout_constraintHorizontal_bias="0.0"
@@ -314,6 +314,36 @@
 
     </android.support.constraint.ConstraintLayout>
 
+
+    <TextView
+        android:id="@+id/noticeBoardTask_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:padding="5dp"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:textColor="#6f04f1"
+        android:textSize="30sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/mainBalance_id" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="notice"
+        app:layout_constraintBottom_toTopOf="@+id/noticeBoardTask_id"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.963" />
 
 
 </android.support.constraint.ConstraintLayout>

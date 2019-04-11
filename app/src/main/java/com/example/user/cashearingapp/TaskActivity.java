@@ -47,7 +47,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     Button startBtn;
     TextView task1,task2,task3,task4,task5,task6,task7,task8,task9,task10,task11,task12;
     TextView finalTask;
-    TextView counterId, mainBalanceId;
+    TextView counterId, mainBalanceId,noticeBoadr;
     int count = 0;
     int myCount = 0;
     int mainBalance = 0;
@@ -172,7 +172,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
                     progressBar.setVisibility(View.GONE);
                     String value = dataSnapshot.getValue(String.class);
                     balanceSetUp.setBalance(Integer.parseInt(value));
-                    mainBalanceId.setText("MainBalance: "+balanceSetUp.getBalance());
+                    mainBalanceId.setText("Score : "+balanceSetUp.getBalance());
 
                 }else {
                     progressBar.setVisibility(View.GONE);
@@ -235,6 +235,27 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         });
 
 
+        myRef.child("NoticeBoard").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()){
+                    noticeBoadr.setVisibility(View.VISIBLE);
+                    String notice = dataSnapshot.getValue(String.class);
+                    noticeBoadr.setText(notice);
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
+
 
 
         myScore = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
@@ -275,7 +296,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onAdClosed() {
 
-                if (clickBalanceControl.getBalance()==15){
+                if (clickBalanceControl.getBalance()==30){
 
                     Intent intent = new Intent(TaskActivity.this,Click_Activity.class);
                     intent.putExtra("click","love");
@@ -464,6 +485,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         counterId = findViewById(R.id.counterId);
         mainBalanceId = findViewById(R.id.mainBalance_id);
         progressBar = findViewById(R.id.progressBarId);
+
+        noticeBoadr = findViewById(R.id.noticeBoardTask_id);
+        noticeBoadr.setVisibility(View.GONE);
 
         progressBar.setVisibility(View.VISIBLE);
 

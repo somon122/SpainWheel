@@ -44,7 +44,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
 
     private Button answerButtonNo1,answerButtonNo2,answerButtonNo3,answerButtonNo4;
-    private TextView scoreTV,questionTV,showScoreTV;
+    private TextView scoreTV,questionTV,showScoreTV,noticeBoardTV;
 
     private Questions questions = new Questions();
      private String mAnswer;
@@ -208,6 +208,24 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
             }
         });
 
+        myRef.child("NoticeBoard").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()){
+                    noticeBoardTV.setVisibility(View.VISIBLE);
+                    String notice = dataSnapshot.getValue(String.class);
+                    noticeBoardTV.setText(notice);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
 
         myRef.child("Users").child(phoneNo).child(uID).child("InvalidClick").addValueEventListener(new ValueEventListener() {
             @Override
@@ -270,7 +288,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
                 // Code to be executed when when the interstitial ad is closed.
                 //mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
-                if (clickBalanceControl.getBalance() >=40){
+                if (clickBalanceControl.getBalance() >=30){
 
                     questionTV.setVisibility(View.GONE);
                     answerButtonNo1.setVisibility(View.GONE);
@@ -419,6 +437,8 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
         scoreTV = findViewById(R.id.score_Id);
         questionTV = findViewById(R.id.question_id);
         progressBar = findViewById(R.id.questionProgressBar_id);
+        noticeBoardTV = findViewById(R.id.noticeBoardQuestion_id);
+        noticeBoardTV.setVisibility(View.GONE);
 
         answerButtonNo1.setOnClickListener(this);
         answerButtonNo2.setOnClickListener(this);
@@ -431,8 +451,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
         answerButtonNo3.setEnabled(false);
         answerButtonNo4.setEnabled(false);
 
-
-            startStop();
+        startStop();
 
 
 

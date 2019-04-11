@@ -56,16 +56,17 @@
         <TextView
             android:id="@+id/question_id"
             android:layout_width="match_parent"
-            android:layout_height="103dp"
+            android:layout_height="80dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="112dp"
             android:gravity="center"
             android:padding="5dp"
             android:text="Question"
             android:textColor="#fdfdfd"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/showScore_Id" />
 
@@ -75,10 +76,10 @@
             android:layout_height="50dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="72dp"
+            android:layout_marginTop="24dp"
+            android:background="#2ca2f5"
             android:gravity="center"
             android:padding="5dp"
-            android:background="#2ca2f5"
             android:text="Ans. No 1"
             android:textAllCaps="false"
             android:textSize="15sp"
@@ -150,7 +151,37 @@
             app:layout_constraintHorizontal_bias="0.484"
             app:layout_constraintStart_toStartOf="@+id/answerNo2_id"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.318" />
+            app:layout_constraintVertical_bias="0.341" />
+
+        <TextView
+            android:id="@+id/noticeBoardQuestion_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:padding="5dp"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:textColor="#6f04f1"
+            android:textSize="30sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/score_Id" />
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Notice"
+            app:layout_constraintBottom_toTopOf="@+id/noticeBoardQuestion_id"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/score_Id" />
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
@@ -158,6 +189,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fff"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

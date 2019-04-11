@@ -50,7 +50,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
     Button tapButton;
     ImageView wheelImage;
-    TextView resultView,counterShow;
+    TextView resultView,counterShow,noticeBoardTV;
 
     Random r;
     int degree = 0, degree_old = 0;
@@ -183,6 +183,8 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
         resultView= findViewById(R.id.resultId);
         counterShow= findViewById(R.id.counterShow_Id);
         tapButton.setVisibility(View.GONE);
+        noticeBoardTV = findViewById(R.id.noticeBoard_id);
+        noticeBoardTV.setVisibility(View.GONE);
 
         phoneNo = user.getPhoneNumber();
 
@@ -297,7 +299,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
                 // Code to be executed when when the interstitial ad is closed.
 
 
-                if (clickBalanceControl.getBalance() >=40)
+                if (clickBalanceControl.getBalance() >=30)
 
                 {
                     videoCounter = videoCounter-5;
@@ -443,6 +445,26 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onCancelled(DatabaseError error) {
 
+
+            }
+        });
+
+
+        myRef.child("NoticeBoard").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists()){
+                    noticeBoardTV.setVisibility(View.VISIBLE);
+                    String notice = dataSnapshot.getValue(String.class);
+                    noticeBoardTV.setText(notice);
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
