@@ -1,7 +1,9 @@
 package com.example.user.cashearingapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -100,6 +102,9 @@ public class MainActivity extends AppCompatActivity
     ImageView reLoad;
     ConstraintLayout constraintLayout;
 
+    SharedPreferences sharedPreferences;
+    int workControl = 0;
+
 
 
     @Override
@@ -132,7 +137,16 @@ public class MainActivity extends AppCompatActivity
             myWorkList = new ArrayList<>();
             Bundle bundle = getIntent().getExtras();
 
+
+            sharedPreferences = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+            workControl = sharedPreferences.getInt("workControl",0);
+
             if (bundle != null){
+                workControl++;
+                sharedPreferences = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt("workControl", workControl);
+                editor.commit();
                 startStop();
 
             }
@@ -299,10 +313,8 @@ public class MainActivity extends AppCompatActivity
         //String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
         String id = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 */
-
         locale = ConfigurationCompat.getLocales(Resources.getSystem().getConfiguration()).get(0);
 
-        // Read from the database
 
 
 
@@ -337,18 +349,20 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
     @Override
     public void onBackPressed() {
-        backSpaceCount++;
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
 
-            if (backSpaceCount==2){
-                backSpassAlert();
+            if (backSpaceCount==1){
+                super.onBackPressed();
+
             }else {
-                Toast.makeText(this, "please Waiting....", Toast.LENGTH_SHORT).show();
+                backSpaceCount++;
+                Toast.makeText(this, "Tap again to exit", Toast.LENGTH_SHORT).show();
             }
 
 
@@ -394,16 +408,63 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.love2_id) {
-            startActivity(new Intent(MainActivity.this, TaskActivity.class));
+
+            if (workControl ==1){
+                startActivity(new Intent(MainActivity.this, TaskActivity.class));
+            }else if (workControl == 0){
+                Toast.makeText(this, "Please Complete Wheel Spin Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else if (workControl==2){
+                Toast.makeText(this, "Please Complete Quiz Question Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else {
+                Toast.makeText(this, "Please Try Again", Toast.LENGTH_SHORT).show();
+            }
+
 
         } else if (id == R.id.mcq_id) {
-            startActivity(new Intent(MainActivity.this, QuestionWorkActivity.class));
+
+            if (workControl ==1){
+                Toast.makeText(this, "Please Complete  Love Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+            }else if (workControl == 0){
+                Toast.makeText(this, "Please Complete Wheel Spin Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else if (workControl==2){
+                startActivity(new Intent(MainActivity.this, QuestionWorkActivity.class));
+
+
+
+            }else {
+                Toast.makeText(this, "Please Try Again", Toast.LENGTH_SHORT).show();
+            }
+
 
         }else if (id == R.id.dashBoard_id) {
             startActivity(new Intent(MainActivity.this, DashBoadActivity.class));
 
         } else if (id == R.id.wheelGame_id) {
-            startActivity(new Intent(MainActivity.this, WheelActivity.class));
+
+
+            if (workControl ==1){
+
+                Toast.makeText(this, "Please Complete Love Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+            }else if (workControl == 0){
+                startActivity(new Intent(MainActivity.this, WheelActivity.class));
+
+
+            }else if (workControl==2){
+                Toast.makeText(this, "Please Complete Quiz Question Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else {
+                Toast.makeText(this, "Please Try Again", Toast.LENGTH_SHORT).show();
+            }
+
 
         } else if (id == R.id.convertPoint_id) {
 
@@ -426,8 +487,6 @@ public class MainActivity extends AppCompatActivity
 
         else if (id == R.id.share_id) {
 
-            startActivity(new Intent(MainActivity.this, AccountSetUpActivity.class));
-
 
         } else if (id == R.id.rulesShow22_id) {
 
@@ -435,7 +494,6 @@ public class MainActivity extends AppCompatActivity
 
 
         } else if (id == R.id.aboutMe_id) {
-            startActivity(new Intent(MainActivity.this, PhoneAuthConfirmActivity.class));
 
 
         }else if (id == R.id.logOut_id2) {
@@ -457,8 +515,8 @@ public class MainActivity extends AppCompatActivity
 
         if (haveNetwork()){
 
-            if (balanceSetUp.getBalance() >= 5){
-                balanceSetUp.Withdraw(5);
+            if (balanceSetUp.getBalance() >= 50000){
+                balanceSetUp.Withdraw(50000);
                 String updateScore = String.valueOf(balanceSetUp.getBalance());
                 myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateScore);
 
@@ -494,15 +552,63 @@ public class MainActivity extends AppCompatActivity
 
         }
         if (v.getId()==R.id.wheelSpin_id){
-            startActivity(new Intent(MainActivity.this,WheelActivity.class));
+
+
+            if (workControl ==1){
+
+                Toast.makeText(this, "Please Complete Love Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+            }else if (workControl == 0){
+                startActivity(new Intent(MainActivity.this, WheelActivity.class));
+
+
+            }else if (workControl==2){
+                Toast.makeText(this, "Please Complete Quiz Question Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else {
+                Toast.makeText(this, "Please Try Again", Toast.LENGTH_SHORT).show();
+            }
+
 
         }
         if (v.getId()==R.id.quiz_id){
-            startActivity(new Intent(MainActivity.this,QuestionWorkActivity.class));
+
+            if (workControl ==1){
+                Toast.makeText(this, "Please Complete  Love Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+            }else if (workControl == 0){
+                Toast.makeText(this, "Please Complete Wheel Spin Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else if (workControl==2){
+                startActivity(new Intent(MainActivity.this, QuestionWorkActivity.class));
+
+
+
+            }else {
+                Toast.makeText(this, "Please Try Again", Toast.LENGTH_SHORT).show();
+            }
+
 
         }
         if (v.getId()==R.id.love_id){
-            startActivity(new Intent(MainActivity.this,TaskActivity.class));
+
+            if (workControl ==1){
+                startActivity(new Intent(MainActivity.this, TaskActivity.class));
+            }else if (workControl == 0){
+                Toast.makeText(this, "Please Complete Wheel Spin Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else if (workControl==2){
+                Toast.makeText(this, "Please Complete Quiz Question Game \n\n Then Try Again.. ok !", Toast.LENGTH_SHORT).show();
+
+
+            }else {
+                Toast.makeText(this, "Please Try Again", Toast.LENGTH_SHORT).show();
+            }
+
+
 
         }
 
@@ -615,6 +721,13 @@ public class MainActivity extends AppCompatActivity
                 waitingLayout.setVisibility(View.GONE);
                 floatingActionMenu.setVisibility(View.VISIBLE);
                 toolbar.setVisibility(View.VISIBLE);
+                if (workControl == 3){
+                    workControl = workControl-3;
+                    sharedPreferences = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("workControl", workControl);
+                    editor.commit();
+                }
 
                 Toast.makeText(MainActivity.this, "Ready For work", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(MainActivity.this,MainActivity.class));
