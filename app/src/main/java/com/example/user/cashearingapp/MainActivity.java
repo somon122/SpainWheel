@@ -48,6 +48,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.squareup.picasso.Picasso;
@@ -215,7 +216,7 @@ public class MainActivity extends AppCompatActivity
 
                         }else {
                             progressBar.setVisibility(View.GONE);
-                            Toast.makeText(MainActivity.this, " Data is loading...", Toast.LENGTH_SHORT).show();
+
                         }
 
                     }
@@ -330,8 +331,9 @@ public class MainActivity extends AppCompatActivity
         floatingActionMenu = findViewById(R.id.floatingMenu_id);
         progressBar = findViewById(R.id.progressBar2222_id);
         timeShowTV = findViewById(R.id.timeShoe_id);
-
-
+       /* TextView textView = findViewById(R.id.serverTime_id);
+        textView.setText((CharSequence) FieldValue.serverTimestamp());
+*/
 
 
     }
@@ -472,13 +474,13 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.withdrawActivity_id) {
 
-            if (clickBalanceControl.getBalance()>=500 ){
+            if (clickBalanceControl.getBalance()>=300 ){
 
                 startActivity(new Intent(MainActivity.this, WithdrawActivity.class));
 
             }else {
 
-                Toast.makeText(this, "Sorry..! You don't have enough Balance", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Sorry..! You don't have enough Balance\n\n Minimum Withdraw TK 300", Toast.LENGTH_LONG).show();
             }
 
 
@@ -515,12 +517,12 @@ public class MainActivity extends AppCompatActivity
 
         if (haveNetwork()){
 
-            if (balanceSetUp.getBalance() >= 50000){
-                balanceSetUp.Withdraw(50000);
+            if (balanceSetUp.getBalance() >= 30000){
+                balanceSetUp.Withdraw(30000);
                 String updateScore = String.valueOf(balanceSetUp.getBalance());
                 myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateScore);
 
-                clickBalanceControl.AddBalance(500);
+                clickBalanceControl.AddBalance(300);
                 String updateBalance = String.valueOf(clickBalanceControl.getBalance());
                 myRef.child("Users").child(phoneNo).child(uID).child("ConvertBalance").setValue(updateBalance);
 
@@ -528,7 +530,7 @@ public class MainActivity extends AppCompatActivity
 
 
             }else {
-                Toast.makeText(this, "Sorry..! You don't have enough point"+balanceSetUp.getBalance(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Sorry..! You don't have enough point\n\nMinimum 30000 points needed", Toast.LENGTH_LONG).show();
             }
 
 
@@ -652,7 +654,7 @@ public class MainActivity extends AppCompatActivity
 
         builder.setTitle("Convert Point")
                 .setIcon(R.drawable.full_love)
-                .setMessage("Congratulation..! \n You got Tk500")
+                .setMessage("Congratulation..! \n You got Tk300")
                 .setCancelable(false)
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override

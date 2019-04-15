@@ -8,11 +8,17 @@ import android.os.Bundle;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
+
 public class OpeningScreenActivity extends AppCompatActivity {
 
 
     private int progress;
     private ProgressBar progressBar;
+
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +26,16 @@ public class OpeningScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_opening_screen);
 
 
+
+
         if (HaveNetwork()){
+
+            MobileAds.initialize(this,
+                    getString(R.string.test_AppUnitId));
+            mAdView = findViewById(R.id.openScreenBannerAdView_id);
+            AdRequest adRequest = new AdRequest.Builder().build();
+            mAdView.loadAd(adRequest);
+
             progressBar = findViewById(R.id.progressBar_id);
             Thread thread = new Thread(new Runnable() {
                 @Override
@@ -46,7 +61,7 @@ public class OpeningScreenActivity extends AppCompatActivity {
 
     private void doTheWork() {
 
-        for (progress = 20; progress <= 100; progress = progress+20){
+        for (progress = 10; progress <= 100; progress = progress+10){
             try {
                 Thread.sleep(1000);
                 progressBar.setProgress(progress);

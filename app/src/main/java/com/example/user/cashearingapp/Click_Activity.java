@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -60,6 +61,7 @@ public class Click_Activity extends AppCompatActivity {
     String phoneNo;
     String updateInvalidScore;
 
+    private AdView mAdView;
 
 
 
@@ -87,16 +89,22 @@ public class Click_Activity extends AppCompatActivity {
         phoneNo = user.getPhoneNumber();
 
 
-
         clickButton.setVisibility(View.GONE);
 
         balanceControl();
 
         MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+                getString(R.string.test_AppUnitId));
+
+
+        mAdView = findViewById(R.id.clickBannerAdView_id);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId(getString(R.string.test_Interstitial_AdsUnit));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
 
@@ -435,7 +443,6 @@ public class Click_Activity extends AppCompatActivity {
             public void onFinish() {
                 clickScore++;
                 mainScore = mainScore+10;
-
 
                 try {
                     clickScoreControl();

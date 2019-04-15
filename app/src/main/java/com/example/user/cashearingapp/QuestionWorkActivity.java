@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -83,6 +84,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
     String updateInvalidScore;
 
+    private AdView mAdView;
 
 
 
@@ -422,10 +424,14 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
 
         MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+                getString(R.string.test_AppUnitId));
+
+        mAdView = findViewById(R.id.questionBannerAdView_id);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId(getString(R.string.test_Interstitial_AdsUnit));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
         r = new Random();
@@ -660,7 +666,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
                 answerButtonNo3.setEnabled(true);
                 answerButtonNo4.setEnabled(true);
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(QuestionWorkActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();            }
+                }
         }.start();
         timeRunning = true;
         //startBtn.setText("Pause");

@@ -9,4 +9,28 @@
     <string name="start">Start</string>
     <string name="_10_00">10:00</string>
     <string name="textview"> Home Page </string>
+
+
+    <string name="mainWheelBannerAds">ca-app-pub-5712002289366851/2018794533</string>
+    <string name="mainWheelIterstitialAds">ca-app-pub-5712002289366851/8920507554</string>
+    <string name="mainWheelRewardedAds">ca-app-pub-5712002289366851/6074852362</string>
+
+
+    <string name="mainLoveBannerAds">ca-app-pub-5712002289366851/3940129028</string>
+    <string name="mainLoveIterstitialAds">ca-app-pub-5712002289366851/3804397656</string>
+    <string name="mainLoveRewardedAds">ca-app-pub-5712002289366851/3145922104</string>
+
+    <string name="mainQuizBannerAds">ca-app-pub-5712002289366851/4935670013</string>
+    <string name="mainQuizIterstitialAds">ca-app-pub-5712002289366851/2557876541</string>
+    <string name="mainQuizRewardedAds">ca-app-pub-5712002289366851/2654967519</string>
+
+    <string name="mainExampleBanner">ca-app-pub-5712002289366851/9433318222</string>
+    <string name="mainAppIdUnit">ca-app-pub-5712002289366851~4836529566</string>
+
+    <string name="test_AppUnitId">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="testBanner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <string name="test_Interstitial_AdsUnit">ca-app-pub-3940256099942544/1033173712</string>
+    <string name="test_RewardedVideoUnit">ca-app-pub-3940256099942544/5224354917</string>
+
+
 </resources>

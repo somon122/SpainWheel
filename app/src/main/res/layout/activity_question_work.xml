@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".QuestionWorkActivity">
@@ -10,17 +11,13 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:background="#2ca2f5"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintVertical_bias="0.0">
 
         <TextView
             android:id="@+id/score_Id"
@@ -56,10 +53,10 @@
         <TextView
             android:id="@+id/question_id"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="70dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="112dp"
+            android:layout_marginTop="104dp"
             android:gravity="center"
             android:padding="5dp"
             android:text="Question"
@@ -76,7 +73,7 @@
             android:layout_height="50dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:background="#2ca2f5"
             android:gravity="center"
             android:padding="5dp"
@@ -94,12 +91,12 @@
             android:layout_height="50dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:textAllCaps="false"
             android:layout_marginTop="8dp"
+            android:background="#2ca2f5"
             android:gravity="center"
             android:padding="5dp"
-            android:background="#2ca2f5"
             android:text="Ans. No 2"
+            android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/answerNo1_id" />
@@ -111,11 +108,11 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:padding="5dp"
-            android:textAllCaps="false"
-            android:gravity="center"
             android:background="#2ca2f5"
+            android:gravity="center"
+            android:padding="5dp"
             android:text="Ans. No 3"
+            android:textAllCaps="false"
             android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -128,11 +125,11 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:textAllCaps="false"
-            android:padding="5dp"
-            android:gravity="center"
             android:background="#2ca2f5"
+            android:gravity="center"
+            android:padding="5dp"
             android:text="Ans. No 4"
+            android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/answerNo3_id" />
@@ -182,6 +179,22 @@
             app:layout_constraintBottom_toTopOf="@+id/noticeBoardQuestion_id"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/score_Id" />
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/questionBannerAdView_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/testBanner_ad_unit_id"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+        </com.google.android.gms.ads.AdView>
+
+
     </android.support.constraint.ConstraintLayout>
 
     <android.support.constraint.ConstraintLayout
@@ -189,7 +202,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fff"
-        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -222,8 +234,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/questionPageReLoadImage_id" />
 
-
     </android.support.constraint.ConstraintLayout>
+
+
 
 
 

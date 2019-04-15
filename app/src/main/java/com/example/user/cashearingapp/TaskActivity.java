@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
@@ -89,6 +90,8 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     ConstraintLayout constraintLayout;
 
     String updateInvalidScore;
+
+    private AdView mAdView;
 
 
 
@@ -449,7 +452,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("UserBalance");
 
-
         auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
         uID = user.getUid();
@@ -460,10 +462,15 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
 
         MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+                getString(R.string.test_AppUnitId));
+
+        mAdView = findViewById(R.id.loveBannerAdView_id);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId(getString(R.string.test_Interstitial_AdsUnit));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
 
@@ -891,7 +898,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             public void onFinish() {
                progressBar.setVisibility(View.GONE);
                 showWork();
-                Toast.makeText(TaskActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();            }
+                }
         }.start();
         timeRunning = true;
         //startBtn.setText("Pause");

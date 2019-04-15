@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     android:background="#ebf0f9"
     android:layout_height="match_parent"
     tools:context=".WheelActivity">
@@ -81,16 +82,18 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-
     <android.support.constraint.ConstraintLayout
         android:id="@+id/wheelPageReLoad_id"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fff"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <ImageView
             android:id="@+id/wheelPageReLoadImage_id"
@@ -118,7 +121,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/wheelPageReLoadImage_id" />
-
 
 
     </android.support.constraint.ConstraintLayout>
@@ -152,6 +154,23 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/resultId" />
+
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/wheelBannerAdView_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/testBanner_ad_unit_id"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tapButtonId"
+        app:layout_constraintVertical_bias="1.0">
+    </com.google.android.gms.ads.AdView>
 
 
 </android.support.constraint.ConstraintLayout>

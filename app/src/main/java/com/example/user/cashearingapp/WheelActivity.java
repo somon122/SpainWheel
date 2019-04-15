@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.reward.RewardItem;
@@ -76,21 +77,18 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     int counter = 0;
     int videoCounter = 0;
     int invalidCount = 0;
-
     CountDownTimer countDownTimer;
     long timeLeft = 10000;
     boolean timeRunning;
     String timeText;
-
-
     int warningScore;
     SharedPreferences myScore3;
     SharedPreferences videoControl;
-
     ImageView reLoad;
     ConstraintLayout constraintLayout;
-
     String updateInvalidScore;
+
+    private AdView mAdView;
 
 
 
@@ -175,6 +173,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
         uId = user.getUid();
 
+
         balanceSetUp= new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
         invalidClickControler = new InvalidClickControler();
@@ -197,10 +196,15 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
 
         MobileAds.initialize(this,
-                "ca-app-pub-3940256099942544~3347511713");
+                getString(R.string.test_AppUnitId));
+
+        mAdView = findViewById(R.id.wheelBannerAdView_id);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
 
         mInterstitialAd = new InterstitialAd(this);
-        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+        mInterstitialAd.setAdUnitId(getString(R.string.test_Interstitial_AdsUnit));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
         mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
@@ -667,7 +671,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
     private void loadRewardedVideoAd() {
 
-        mRewardedVideoAd.loadAd("ca-app-pub-3940256099942544/5224354917",
+        mRewardedVideoAd.loadAd(getString(R.string.test_RewardedVideoUnit),
                 new AdRequest.Builder().build());
     }
 
@@ -696,7 +700,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onRewardedVideoAdClosed() {
 
-        if (clickBalanceControl.getBalance() >=40)
+        if (clickBalanceControl.getBalance() >=30)
 
         {
             videoCounter = videoCounter-5;
@@ -908,7 +912,7 @@ public class WheelActivity extends AppCompatActivity implements View.OnClickList
 
                 tapButton.setVisibility(View.VISIBLE);
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(WheelActivity.this, "Task ready for you ", Toast.LENGTH_SHORT).show();
+
             }
         }.start();
         timeRunning = true;

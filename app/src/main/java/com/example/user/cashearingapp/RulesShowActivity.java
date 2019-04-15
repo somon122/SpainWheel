@@ -7,6 +7,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,6 +28,9 @@ public class RulesShowActivity extends AppCompatActivity {
 
     FirebaseDatabase database;
     DatabaseReference myRef;
+    AdView mAdView;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,10 @@ public class RulesShowActivity extends AppCompatActivity {
         progressDialog.show();
         progressDialog.setMessage("Information is loading...");
 
+       /* mAdView = findViewById(R.id.rulesBannerAdView_id);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+*/
 
 
         myRef.child("UserRules").addValueEventListener(new ValueEventListener() {
