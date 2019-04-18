@@ -42,7 +42,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class TaskActivity extends AppCompatActivity implements View.OnClickListener {
+public class TaskActivity extends AppCompatActivity implements View.OnClickListener,RewardedVideoAdListener {
 
     TextView timeTV2;
     Button startBtn;
@@ -58,6 +58,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
     int invalidCount = 0;
 
     private InterstitialAd mInterstitialAd;
+    private RewardedVideoAd mRewardedVideoAd;
 
     SharedPreferences myScore;
     SharedPreferences myScore3;
@@ -269,8 +270,6 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         completeTask();
 
-
-
         mInterstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
@@ -340,7 +339,7 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
                         myRef.child("Users").child(phoneNo).child(uID).child("LoveBalance").setValue(showBalance);
 
                         progressBar.setVisibility(View.VISIBLE);
-                        re_Loaded();
+                        re_Loaded(mainBalance);
 
 
                     }
@@ -472,6 +471,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         mInterstitialAd = new InterstitialAd(this);
         mInterstitialAd.setAdUnitId(getString(R.string.test_Interstitial_AdsUnit));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
 
 
         dialog = new ProgressDialog(this);
@@ -701,9 +704,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         } if (v.getId() == R.id.task3){
             if (myCount ==2){
-                if (mInterstitialAd.isLoaded()) {
+                if (mRewardedVideoAd.isLoaded()) {
                     if (timeLeft <9999 ) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
                         task3.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -749,9 +752,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }if (v.getId() == R.id.task6){
 
             if (myCount == 5) {
-                if (mInterstitialAd.isLoaded()) {
+                if (mRewardedVideoAd.isLoaded()) {
                     if (timeLeft <9999) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
                         task6.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -811,10 +814,10 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
         }if (v.getId() == R.id.task10){
             if (myCount == 9) {
-                if (mInterstitialAd.isLoaded()) {
+                if (mRewardedVideoAd.isLoaded()) {
 
                     if (timeLeft <9999) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
                         task10.setBackgroundResource(R.drawable.full_love);
                     }
 
@@ -844,9 +847,9 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
         }if (v.getId() == R.id.task12){
 
             if (myCount == 11){
-                if (mInterstitialAd.isLoaded()) {
+                if (mRewardedVideoAd.isLoaded()) {
                     if (timeLeft <9999) {
-                        mInterstitialAd.show();
+                        mRewardedVideoAd.show();
 
                     }
 
@@ -998,12 +1001,12 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-        private void re_Loaded(){
+        private void re_Loaded(int score){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(TaskActivity.this);
 
-        builder.setMessage("Great Work ..!" +
-                "\n"+ " Click Ok  For Continue Game ...")
+        builder.setMessage("Great Work ..! \n\n You got "+score+"points"+
+                "\n\n"+ " Click Ok  For Continue Game ...")
                 .setCancelable(false)
                 .setPositiveButton(" Ok ", new DialogInterface.OnClickListener() {
                     @Override
@@ -1061,6 +1064,111 @@ public class TaskActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+
+    }
+    private void loadRewardedVideoAd() {
+
+        mRewardedVideoAd.loadAd(getString(R.string.test_RewardedVideoUnit),
+                new AdRequest.Builder().build());
+    }
+
+    @Override
+    public void onRewardedVideoAdLoaded() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+
+        videoAdIsLoaded();
+
+    }
+
+    @Override
+    public void onRewardedVideoStarted() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
+
+        if (clickBalanceControl.getBalance()==30){
+
+            Intent intent = new Intent(TaskActivity.this,Click_Activity.class);
+            intent.putExtra("click","love");
+            startActivity(intent);
+            finish();
+
+
+        }else {
+            if (myCount >=12){
+
+                myCount = myCount-12;
+                myScore = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = myScore.edit();
+                editor.putInt("score", myCount);
+                editor.commit();
+
+                mainBalanceAddPoint();
+                progressBar.setVisibility(View.VISIBLE);
+                hideWork();
+                starStop2();
+
+
+            }else {
+
+                mainBalance = mainBalance+5;
+
+                balanceSetUp.AddBalance(mainBalance);
+                String updateBalance = String.valueOf(balanceSetUp.getBalance());
+                myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateBalance);
+
+                count++;
+                myCount++;
+
+                myScore = getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = myScore.edit();
+                editor.putInt("score", myCount);
+                editor.commit();
+
+
+                clickBalanceControl.AddBalance(count);
+                String showBalance = String.valueOf(clickBalanceControl.getBalance());
+                myRef.child("Users").child(phoneNo).child(uID).child("LoveBalance").setValue(showBalance);
+
+                progressBar.setVisibility(View.VISIBLE);
+                re_Loaded(mainBalance);
+
+
+            }
+
+        }
+
+    }
+
+    @Override
+    public void onRewarded(RewardItem rewardItem) {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int i) {
+
+    }
+
+    private void videoAdIsLoaded() {
+
+        if (mRewardedVideoAd.isLoaded()){
+
+        }else {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Net Connection is Slow", Toast.LENGTH_SHORT).show();
+        }
 
     }
 

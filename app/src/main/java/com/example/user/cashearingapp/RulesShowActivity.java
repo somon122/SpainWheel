@@ -49,10 +49,9 @@ public class RulesShowActivity extends AppCompatActivity {
         progressDialog.show();
         progressDialog.setMessage("Information is loading...");
 
-       /* mAdView = findViewById(R.id.rulesBannerAdView_id);
+        mAdView = findViewById(R.id.rulesBannerAdView_id);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-*/
 
 
         myRef.child("UserRules").addValueEventListener(new ValueEventListener() {
@@ -78,7 +77,7 @@ public class RulesShowActivity extends AppCompatActivity {
 
                 }else {
                     progressDialog.dismiss();
-                    Toast.makeText(RulesShowActivity.this, "Data is Empty", Toast.LENGTH_SHORT).show();
+
                 }
 
             }

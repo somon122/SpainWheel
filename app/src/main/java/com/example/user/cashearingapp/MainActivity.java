@@ -1,5 +1,6 @@
 package com.example.user.cashearingapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -7,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.Settings;
@@ -37,6 +39,7 @@ import com.example.user.cashearingapp.PhoneAuth.PhoneAuthActivity;
 import com.example.user.cashearingapp.PhoneAuth.PhoneAuthConfirmActivity;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -65,46 +68,48 @@ public class MainActivity extends AppCompatActivity
 
 
     private TextView deviceId,timeShowTV;
-    ConstraintLayout waitingLayout;
-    TimePicker timePicker;
-    ProgressBar progressBar;
-    int backSpaceCount = 0;
+    private ConstraintLayout waitingLayout;
+    private TimePicker timePicker;
+    private ProgressBar progressBar;
+    private int backSpaceCount = 0;
 
-    FloatingActionButton rulesButton, wheelButton,quziButton,loveButton;
+    private final int REQUEST_INVITE = 420;
 
-    Locale locale;
+    private FloatingActionButton rulesButton, wheelButton,quziButton,loveButton;
 
-    DrawerLayout drawer;
-    NavigationView navigationView;
-    Toolbar toolbar;
+    private Locale locale;
 
-    FirebaseDatabase database;
-    DatabaseReference myRef;
-    FirebaseFirestore mFirestone;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
+    private Toolbar toolbar;
+
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
+    private FirebaseFirestore mFirestone;
 
 
-    FirebaseAuth auth;
-    FirebaseUser user;
-    String uID;
-    BalanceSetUp balanceSetUp;
-    ClickBalanceControl clickBalanceControl;
+    private FirebaseAuth auth;
+    private FirebaseUser user;
+    private String uID;
+    private BalanceSetUp balanceSetUp;
+    private ClickBalanceControl clickBalanceControl;
 
-    CountDownTimer countDownTimer;
-    long timeLeft = 30000;
+    private CountDownTimer countDownTimer;
+    private long timeLeft = 30000;
     boolean timeRunning;
-    String timeText;
-    String phoneNo;
-    FloatingActionMenu floatingActionMenu;
+    private String timeText;
+    private String phoneNo;
+    private FloatingActionMenu floatingActionMenu;
 
-    RecyclerView recyclerMyWOrkView;
+    private RecyclerView recyclerMyWOrkView;
     private List<MyWorkClass> myWorkList;
     private MyWorkAdapter adapter;
 
-    ImageView reLoad;
-    ConstraintLayout constraintLayout;
+    private ImageView reLoad;
+    private ConstraintLayout constraintLayout;
 
-    SharedPreferences sharedPreferences;
-    int workControl = 0;
+    private SharedPreferences sharedPreferences;
+    private int workControl = 0;
 
 
 
@@ -141,6 +146,8 @@ public class MainActivity extends AppCompatActivity
 
             sharedPreferences = this.getSharedPreferences("MyAwesomeScore", Context.MODE_PRIVATE);
             workControl = sharedPreferences.getInt("workControl",0);
+
+
 
             if (bundle != null){
                 workControl++;
@@ -304,6 +311,8 @@ public class MainActivity extends AppCompatActivity
             uID = user.getUid();
             phoneNo = user.getPhoneNumber();
         }
+
+       
         rulesButton.setOnClickListener(this);
         loveButton.setOnClickListener(this);
         quziButton.setOnClickListener(this);
@@ -490,6 +499,10 @@ public class MainActivity extends AppCompatActivity
         else if (id == R.id.share_id) {
 
 
+            onInviteClicked();
+
+
+
         } else if (id == R.id.rulesShow22_id) {
 
             startActivity(new Intent(MainActivity.this, RulesShowActivity.class));
@@ -512,6 +525,35 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private void onInviteClicked() {
+        @SuppressLint("ResourceType") Intent intent = new AppInviteInvitation.IntentBuilder("Cash Earning App")
+                .setMessage("Download this app for best Income")
+                .setDeepLink(Uri.parse("https://drive.google.com/open?id=1VoBbilyVl3QdO6lQCn9At4sNENakMlcg"))
+               /* .setCustomImage(Uri.parse(getString(R.drawable.cashearninglogo)))*/
+                .setCallToActionText("Hello")
+                .build();
+        startActivityForResult(intent, REQUEST_INVITE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_INVITE) {
+            if (resultCode == RESULT_OK) {
+                // Get the invitation IDs of all sent messages
+                String[] ids = AppInviteInvitation.getInvitationIds(resultCode, data);
+                for (String id : ids) {
+                    Toast.makeText(this, ""+id, Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "Sorry", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
 
     private void convertPoint() {
 
@@ -670,19 +712,25 @@ public class MainActivity extends AppCompatActivity
 
 
     }
- private void backSpassAlert(){
+ private void rulesAlert(){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
 
-        builder.setMessage("Are you Sure to exit..!")
+        builder.setMessage("আপনি কি সব নিয়মকানুন জানেন?\n(Are you know all Trams and Conditions?)")
                 .setCancelable(false)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton("yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                       finish();
+                        startActivity(new Intent(MainActivity.this,MainActivity.class));
 
                     }
-                });
+                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startActivity(new Intent(MainActivity.this,RulesShowActivity.class));
+
+            }
+        });
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -730,8 +778,6 @@ public class MainActivity extends AppCompatActivity
                     editor.putInt("workControl", workControl);
                     editor.commit();
                 }
-
-                Toast.makeText(MainActivity.this, "Ready For work", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(MainActivity.this,MainActivity.class));
                 finish();
 

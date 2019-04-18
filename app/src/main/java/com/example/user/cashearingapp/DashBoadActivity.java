@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,6 +36,8 @@ public class DashBoadActivity extends AppCompatActivity {
     BalanceSetUp balanceSetUp;
     ClickBalanceControl clickBalanceControl;
 
+    private AdView mAdView;
+
 
 
 
@@ -55,6 +59,10 @@ public class DashBoadActivity extends AppCompatActivity {
         circleImageShow = findViewById(R.id.circleImageShowId);
 
         myRef = database.getReference("UserBalance");
+
+        mAdView = findViewById(R.id.dashBoardBannerAdView_id);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         balanceSetUp = new BalanceSetUp();
         clickBalanceControl = new ClickBalanceControl();
@@ -88,7 +96,7 @@ public class DashBoadActivity extends AppCompatActivity {
 
 
                 }else {
-                    Toast.makeText(DashBoadActivity.this, " Data is empty", Toast.LENGTH_SHORT).show();
+
                 }
 
 
@@ -111,7 +119,7 @@ public class DashBoadActivity extends AppCompatActivity {
                     pointTV.setText(""+value);
 
                 }else {
-                    Toast.makeText(DashBoadActivity.this, " Data is empty", Toast.LENGTH_SHORT).show();
+
                 }
 
 
@@ -137,7 +145,7 @@ public class DashBoadActivity extends AppCompatActivity {
 
 
                 }else {
-                    Toast.makeText(DashBoadActivity.this, " Data is empty", Toast.LENGTH_SHORT).show();
+
                 }
 
 

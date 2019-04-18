@@ -16,7 +16,7 @@ public class Questions {
             "What is 100+50 =?",
             "What is 100 * 100 =?",
             "What is 15+10+5 =?",
-            "What is 50-(10+5)*2 =?",
+            "What is 50-{(10+5)*2} =?",
             "What is 10+5+0+10 =?",
             "What is 100*10% =?",
             "What is 999+1 =?"
@@ -36,7 +36,9 @@ private String mChoices [][]={
         {"Ans 100","Ans 1500","Ans 200","Ans 150"},
         {"Ans 100000","Ans 1000","Ans 10000","Ans 100"},
         {"Ans 30","Ans 20","Ans 35","Ans 25"},
-        {"Ans 50","Ans 70","Ans 100","Ans 200"},
+
+        {"Ans 50","Ans 20","Ans 100","Ans 200"},
+
         {"Ans 30","Ans 15","Ans 25","Ans 10"},
         {"Ans 12","Ans 15","Ans 20","Ans 10"},
 
@@ -45,7 +47,7 @@ private String mChoices [][]={
 
 private String mCarrectAnswer []={
 
-       "Ans 100","Ans 10","Ans 0","Ans 0","Ans 10","Ans 15","Ans 105","Ans 60","Ans 150","Ans 10000","Ans 30","Ans 70","Ans 25","Ans 10","Ans 1000"};
+       "Ans 100","Ans 10","Ans 0","Ans 0","Ans 10","Ans 15","Ans 105","Ans 60","Ans 150","Ans 10000","Ans 30","Ans 20","Ans 25","Ans 10","Ans 1000"};
 
 public String getQuestion (int a)
 {

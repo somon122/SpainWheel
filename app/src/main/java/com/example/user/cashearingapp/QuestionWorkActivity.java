@@ -28,6 +28,9 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.reward.RewardItem;
+import com.google.android.gms.ads.reward.RewardedVideoAd;
+import com.google.android.gms.ads.reward.RewardedVideoAdListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -41,7 +44,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.Random;
 
-public class QuestionWorkActivity extends AppCompatActivity implements View.OnClickListener {
+public class QuestionWorkActivity extends AppCompatActivity implements View.OnClickListener,RewardedVideoAdListener {
 
 
     private Button answerButtonNo1,answerButtonNo2,answerButtonNo3,answerButtonNo4;
@@ -53,6 +56,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
      private int mQuestionsLenght = questions.mQuestions.length ;
      Random r;
     private InterstitialAd mInterstitialAd;
+    private RewardedVideoAd mRewardedVideoAd;
 
     ProgressBar progressBar;
 
@@ -321,7 +325,7 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
                                           answerButtonNo2.setEnabled(false);
                                           answerButtonNo3.setEnabled(false);
                                           answerButtonNo4.setEnabled(false);
-                                          gameLoaded();
+                                          gameLoaded(mainBalance);
                                       }else {
                                           Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
 
@@ -434,6 +438,10 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
         mInterstitialAd.setAdUnitId(getString(R.string.test_Interstitial_AdsUnit));
         mInterstitialAd.loadAd(new AdRequest.Builder().build());
 
+        mRewardedVideoAd = MobileAds.getRewardedVideoAdInstance(this);
+        mRewardedVideoAd.setRewardedVideoAdListener(this);
+        loadRewardedVideoAd();
+
         r = new Random();
         answerButtonNo1 = findViewById(R.id.answerNo1_id);
         answerButtonNo2 = findViewById(R.id.answerNo2_id);
@@ -470,7 +478,9 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
             if (answerButtonNo1.getText()==mAnswer)
             {
-                mInterstitialAd.show();
+                if (mInterstitialAd.isLoaded()){
+                    mInterstitialAd.show();
+                }
 
             }else {
 
@@ -485,7 +495,9 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
             if (answerButtonNo2.getText()==mAnswer)
             {
-                mInterstitialAd.show();
+                if (mInterstitialAd.isLoaded()){
+                    mInterstitialAd.show();
+                }
 
             }else {
 
@@ -498,7 +510,10 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
             if (answerButtonNo3.getText()==mAnswer)
             {
-                mInterstitialAd.show();
+                if (mRewardedVideoAd.isLoaded()){
+                    mRewardedVideoAd.show();
+                }
+
 
             }else {
 
@@ -511,7 +526,9 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
             if (answerButtonNo4.getText()==mAnswer)
             {
-                mInterstitialAd.show();
+                if (mInterstitialAd.isLoaded()){
+                    mInterstitialAd.show();
+                }
 
             }else {
 
@@ -560,12 +577,12 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
     }
 
- private void gameLoaded(){
+ private void gameLoaded(int score){
 
         AlertDialog.Builder builder = new AlertDialog.Builder(QuestionWorkActivity.this);
 
-        builder.setMessage("Great Work ..!" +
-                "\n"+ " Click Ok  For Continue Game ...")
+        builder.setMessage("Great Work ..!\n\nYou got " +score+" points"+
+                "\n\n"+ " Click Ok  For Continue Game ...")
                 .setCancelable(false)
                 .setPositiveButton(" Ok ", new DialogInterface.OnClickListener() {
                     @Override
@@ -696,6 +713,119 @@ public class QuestionWorkActivity extends AppCompatActivity implements View.OnCl
 
 
     }
+    private void videoAdIsLoaded() {
+
+        if (mRewardedVideoAd.isLoaded()){
+
+        }else {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Net Connection is Slow", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    private void loadRewardedVideoAd() {
+
+        mRewardedVideoAd.loadAd(getString(R.string.test_RewardedVideoUnit),
+                new AdRequest.Builder().build());
+    }
+
+    @Override
+    public void onRewardedVideoAdLoaded() {
+        videoAdIsLoaded();
+
+    }
+
+    @Override
+    public void onRewardedVideoAdOpened() {
+
+    }
+
+    @Override
+    public void onRewardedVideoStarted() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdClosed() {
 
 
+        if (clickBalanceControl.getBalance() >=30){
+
+            questionTV.setVisibility(View.GONE);
+            answerButtonNo1.setVisibility(View.GONE);
+            answerButtonNo2.setVisibility(View.GONE);
+            answerButtonNo3.setVisibility(View.GONE);
+            answerButtonNo4.setVisibility(View.GONE);
+            gameOver();
+
+        }else {
+
+            mainBalance=mainBalance+5;
+            balanceSetUp.AddBalance(mainBalance);
+            String updateScore = String.valueOf(balanceSetUp.getBalance());
+            myRef.child("Users").child(phoneNo).child(uID).child("MainBalance").setValue(updateScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()){
+
+                        clickBalanceControl.AddBalance(mainBalance);
+                        String updateShowScore = String.valueOf(clickBalanceControl.getBalance());
+                        myRef.child("Users").child(phoneNo).child(uID).child("QuestionBalance").setValue(updateShowScore).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()){
+
+                                    updateQuestion(r.nextInt(mQuestionsLenght));
+                                    answerButtonNo1.setEnabled(false);
+                                    answerButtonNo2.setEnabled(false);
+                                    answerButtonNo3.setEnabled(false);
+                                    answerButtonNo4.setEnabled(false);
+                                    gameLoaded(mainBalance);
+                                }else {
+                                    Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+
+                    } else {
+
+                        Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                    Toast.makeText(QuestionWorkActivity.this, "Slow Net Connection..", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+        }
+
+
+    }
+
+    @Override
+    public void onRewarded(RewardItem rewardItem) {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdLeftApplication() {
+
+    }
+
+    @Override
+    public void onRewardedVideoAdFailedToLoad(int i) {
+
+    }
 }

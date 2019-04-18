@@ -1,9 +1,11 @@
 package com.example.user.cashearingapp;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -87,6 +89,10 @@ public class Click_Activity extends AppCompatActivity {
 
         uID = user.getUid();
         phoneNo = user.getPhoneNumber();
+
+            gameOver();
+
+
 
 
         clickButton.setVisibility(View.GONE);
@@ -480,6 +486,28 @@ public class Click_Activity extends AppCompatActivity {
 
 
     }
+
+    private void gameOver(){
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(Click_Activity.this);
+
+        builder.setMessage("সাবধান ! \n \n\n First you click here button " +
+                "\n then you click on Ads\n And Please wait 50 second")
+                .setCancelable(false)
+                .setPositiveButton(" Ok ", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+
+    }
+
 
     private void sorryToast(){
 
